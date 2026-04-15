@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vantix — Ops Platform</title>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f5f4f0;--bg3:#eeecea;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#9b9a96;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+  --teal:#1D9E75;--teal-bg:#E1F5EE;--teal-text:#0F6E56;
+  --amber:#EF9F27;--amber-bg:#FAEEDA;--amber-text:#854F0B;
+  --red:#E24B4A;--red-bg:#FCEBEB;--red-text:#A32D2D;
+  --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#185FA5;
+  --purple:#7F77DD;--purple-bg:#EEEDFE;--purple-text:#3C3489;
+  --coral:#D85A30;--coral-bg:#FAECE7;--coral-text:#993C1D;
+  --green-bg:#EAF3DE;--green-text:#3B6D11;
+  --r-md:8px;--r-lg:12px;
+  --font:'Segoe UI',system-ui,-apple-system,sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+    --text:#e8e6e0;--text2:#9b9a96;--text3:#666460;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+    --teal-bg:#04342C;--teal-text:#9FE1CB;
+    --amber-bg:#412402;--amber-text:#FAC775;
+    --red-bg:#501313;--red-text:#F7C1C1;
+    --blue-bg:#042C53;--blue-text:#B5D4F4;
+    --purple-bg:#26215C;--purple-text:#CECBF6;
+    --coral-bg:#4A1B0C;--coral-text:#F5C4B3;
+    --green-bg:#173404;--green-text:#C0DD97;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg3)}
+a{color:var(--blue-text);text-decoration:none}
+
+/* LAYOUT */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:0.5px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#topbar{height:52px;flex-shrink:0;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px}
+#content{flex:1;overflow-y:auto;padding:24px}
+
+/* SIDEBAR */
+.sidebar-logo{padding:16px 16px 8px;font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.3px}
+.sidebar-logo span{color:var(--teal);font-size:11px;font-weight:500;display:block;letter-spacing:.05em;text-transform:uppercase;margin-top:1px}
+.nav-section{padding:10px 10px 4px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r-md);margin:1px 6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:background .12s,color .12s}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:var(--bg);color:var(--text);box-shadow:0 0 0 0.5px var(--border)}
+.nav-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red-bg);color:var(--red-text);font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+
+/* TOPBAR */
+#topbar-title{font-size:15px;font-weight:500;color:var(--text);flex:1}
+.topbar-btn{padding:6px 14px;border-radius:var(--r-md);font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);transition:background .12s}
+.topbar-btn:hover{background:var(--bg3)}
+.topbar-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.topbar-btn.primary:hover{background:#179E6A}
+#save-indicator{font-size:11px;color:var(--text3)}
+
+/* PANELS */
+.panel{display:none}.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:12px}
+
+/* METRICS ROW */
+.metrics-row{display:grid;gap:10px;margin-bottom:18px}
+.metrics-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.metrics-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.metrics-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.metric{background:var(--bg2);border-radius:var(--r-md);padding:14px 16px}
+.metric-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px}
+.metric-value{font-size:24px;font-weight:600;color:var(--text);line-height:1.1}
+.metric-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.metric-delta{font-size:11px;font-weight:500;margin-top:3px}
+.delta-up{color:var(--teal)}.delta-dn{color:var(--red)}
+
+/* SECTION LABEL */
+.section-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:0 0 10px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;border-bottom:0.5px solid var(--border);background:var(--bg2)}
+.tbl td{padding:9px 10px;border-bottom:0.5px solid var(--border);color:var(--text);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--bg2)}
+.tbl-action{background:none;border:none;cursor:pointer;font-size:12px;color:var(--blue-text);padding:2px 6px;border-radius:4px}
+.tbl-action:hover{background:var(--blue-bg)}
+.tbl-del{color:var(--red-text)!important}
+.tbl-del:hover{background:var(--red-bg)!important}
+
+/* PILLS */
+.pill{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.p-teal{background:var(--teal-bg);color:var(--teal-text)}
+.p-amber{background:var(--amber-bg);color:var(--amber-text)}
+.p-red{background:var(--red-bg);color:var(--red-text)}
+.p-blue{background:var(--blue-bg);color:var(--blue-text)}
+.p-purple{background:var(--purple-bg);color:var(--purple-text)}
+.p-coral{background:var(--coral-bg);color:var(--coral-text)}
+.p-green{background:var(--green-bg);color:var(--green-text)}
+.p-gray{background:var(--bg3);color:var(--text2)}
+
+/* FORMS */
+.form-grid{display:grid;gap:10px;margin-bottom:12px}
+.fg2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fg3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fg4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.form-group label{font-size:11px;font-weight:500;color:var(--text2);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;font-size:13px;padding:8px 10px;border:0.5px solid var(--border2);border-radius:var(--r-md);background:var(--bg);color:var(--text);outline:none;font-family:var(--font)}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 2px rgba(29,158,117,.15)}
+textarea{resize:vertical;min-height:68px}
+.btn{padding:8px 16px;border-radius:var(--r-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);transition:background .12s;font-family:var(--font)}
+.btn:hover{background:var(--bg3)}
+.btn-primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn-primary:hover{background:#179E6A}
+.btn-danger{background:var(--red-bg);color:var(--red-text);border-color:var(--red-text)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+
+/* DIVIDER */
+.divider{height:0.5px;background:var(--border);margin:14px 0}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg2);border-radius:20px;height:6px;margin:4px 0 10px}
+.prog-fill{height:6px;border-radius:20px;transition:width .3s}
+
+/* MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+#modal-overlay.open{display:flex}
+#modal-box{background:var(--bg);border-radius:var(--r-lg);padding:24px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;border:0.5px solid var(--border)}
+#modal-title{font-size:16px;font-weight:500;margin-bottom:16px}
+#modal-body{}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* TOUCH SEQUENCE */
+.touch-step{display:flex;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border)}
+.touch-step:last-child{border-bottom:none}
+.touch-num{width:28px;height:28px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
+.touch-body{flex:1}
+.touch-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.touch-meta{font-size:11px;color:var(--text3);margin-bottom:6px}
+.touch-script{font-size:12px;color:var(--text2);line-height:1.65;background:var(--bg2);padding:10px 12px;border-radius:0 var(--r-md) var(--r-md) 0;border-left:3px solid var(--border2);white-space:pre-wrap}
+.day-badge{font-size:10px;font-weight:500;padding:1px 6px;border-radius:3px;background:var(--bg2);color:var(--text3);margin-left:6px}
+
+/* NOTES */
+.note{background:var(--amber-bg);border-left:3px solid var(--amber);padding:10px 12px;border-radius:0 var(--r-md) var(--r-md) 0;font-size:12px;color:var(--amber-text);margin:8px 0}
+
+/* TIMELINE / ACTIVITY */
+.activity-item{display:flex;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.activity-body{flex:1;font-size:12px;color:var(--text2);line-height:1.5}
+.activity-time{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* PROPOSAL */
+.proposal-preview{background:var(--bg2);border-radius:var(--r-md);padding:16px;font-size:12px;line-height:1.8;color:var(--text);white-space:pre-wrap;font-family:monospace;max-height:400px;overflow-y:auto}
+
+/* KANBAN */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+.k-col{min-width:200px;max-width:220px;flex-shrink:0}
+.k-col-header{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:8px 4px;color:var(--text2);display:flex;align-items:center;justify-content:space-between}
+.k-count{font-size:10px;background:var(--bg2);color:var(--text3);padding:1px 7px;border-radius:20px}
+.k-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r-md);padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .12s}
+.k-card:hover{border-color:var(--border2)}
+.k-card-name{font-size:13px;font-weight:500;margin-bottom:3px}
+.k-card-sub{font-size:11px;color:var(--text2)}
+.k-card-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+
+/* TABS (inner) */
+.inner-tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--border);margin-bottom:16px}
+.inner-tab{padding:7px 12px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;margin-bottom:-0.5px}
+.inner-tab.active{color:var(--text);border-bottom-color:var(--text)}
+
+/* VERTICAL BADGE */
+.v-vapor{background:#E6F1FB;color:#185FA5}.v-water{background:#E1F5EE;color:#0F6E56}
+.v-jelly{background:#EEEDFE;color:#3C3489}.v-concert{background:#FAECE7;color:#993C1D}
+.v-broker{background:#FAEEDA;color:#854F0B}
+@media(prefers-color-scheme:dark){
+  .v-vapor{background:#042C53;color:#B5D4F4}.v-water{background:#04342C;color:#9FE1CB}
+  .v-jelly{background:#26215C;color:#CECBF6}.v-concert{background:#4A1B0C;color:#F5C4B3}
+  .v-broker{background:#412402;color:#FAC775}
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  #sidebar{width:180px}
+  .metrics-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fg4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:540px){
+  #sidebar{display:none}
+  .metrics-4,.metrics-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sidebar-logo">Vantix<span>Ops Platform</span></div>
+
+  <div class="nav-section">Overview</div>
+  <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">◈</span>Dashboard</div>
+
+  <div class="nav-section">Revenue</div>
+  <div class="nav-item" onclick="nav('pipeline')"><span class="nav-icon">◎</span>Pipeline / CRM</div>
+  <div class="nav-item" onclick="nav('accounts')"><span class="nav-icon">◻</span>Accounts</div>
+  <div class="nav-item" onclick="nav('orders')"><span class="nav-icon">≡</span>Order book</div>
+  <div class="nav-item" onclick="nav('proposals')"><span class="nav-icon">◷</span>Proposals</div>
+
+  <div class="nav-section">Outreach</div>
+  <div class="nav-item" onclick="nav('sequence')"><span class="nav-icon">↗</span>7-Touch sequence</div>
+  <div class="nav-item" onclick="nav('scripts')"><span class="nav-icon">▷</span>Call scripts</div>
+
+  <div class="nav-section">Ops</div>
+  <div class="nav-item" onclick="nav('deliveries')"><span class="nav-icon">✓</span>Deliveries</div>
+  <div class="nav-item" onclick="nav('activity')"><span class="nav-icon">◑</span>Activity log</div>
+  <div class="nav-section">Data</div>
+  <div class="nav-item" onclick="exportData()"><span class="nav-icon">↓</span>Export JSON</div>
+  <div class="nav-item" onclick="triggerImport()"><span class="nav-icon">↑</span>Import JSON</div>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <div id="topbar-title">Dashboard</div>
+    <span id="save-indicator">All changes saved</span>
+    <button class="topbar-btn" onclick="nav('pipeline');openAddProspect()">+ Add prospect</button>
+    <button class="topbar-btn primary" onclick="nav('orders');openAddOrder()">+ New order</button>
+  </div>
+  <div id="content">
+
+    <!-- DASHBOARD -->
+    <div id="panel-dashboard" class="panel active">
+      <div class="metrics-row metrics-4" id="dash-metrics"></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px">
+        <div>
+          <div class="section-label">Pipeline funnel</div>
+          <div class="card" id="dash-funnel"></div>
+          <div class="section-label" style="margin-top:14px">Active accounts by vertical</div>
+          <div class="card" id="dash-verticals"></div>
+        </div>
+        <div>
+          <div class="section-label">Today's actions</div>
+          <div class="card" id="dash-actions"></div>
+          <div class="section-label" style="margin-top:14px">Recent activity</div>
+          <div class="card" id="dash-recent-activity"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE / CRM -->
+    <div id="panel-pipeline" class="panel">
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInner('pipe','kanban')">Kanban</button>
+        <button class="inner-tab" onclick="switchInner('pipe','table')">Table</button>
+        <button class="inner-tab" onclick="switchInner('pipe','add')">+ Add prospect</button>
+      </div>
+      <div id="pipe-kanban" class="inner-panel-pipe">
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+      <div id="pipe-table" class="inner-panel-pipe" style="display:none">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl" id="prospects-table"></table>
+        </div>
+      </div>
+      <div id="pipe-add" class="inner-panel-pipe" style="display:none">
+        <div class="card">
+          <div class="card-title">Add new prospect</div>
+          <div class="form-grid fg3">
+            <div class="form-group"><label>Contact name *</label><input id="p-name" placeholder="Jane Nkosi"></div>
+            <div class="form-group"><label>Firm name *</label><input id="p-firm" placeholder="Nkosi Brokers (Pty) Ltd"></div>
+            <div class="form-group"><label>Vertical</label>
+              <select id="p-vertical">
+                <option value="broker">Insurance Broker</option>
+                <option value="vapor">Vapor</option>
+                <option value="water">Water</option>
+                <option value="jelly">Jelly</option>
+                <option value="concert">Concert</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Phone</label><input id="p-phone" placeholder="+27 82 000 0000"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="p-email" placeholder="jane@nkosibrokers.co.za"></div>
+            <div class="form-group"><label>LinkedIn / Website</label><input id="p-link" placeholder="linkedin.com/in/..."></div>
+            <div class="form-group"><label>Staff size</label>
+              <select id="p-size"><option>1–5</option><option selected>5–15</option><option>15–30</option><option>30+</option></select>
+            </div>
+            <div class="form-group"><label>Insurers / Book details</label><input id="p-insurers" placeholder="Sanlam, Momentum, Discovery"></div>
+            <div class="form-group"><label>Est. deal value (R/mo)</label><input id="p-value" placeholder="3500" type="number"></div>
+          </div>
+          <div class="form-grid" style="grid-template-columns:1fr">
+            <div class="form-group"><label>Notes</label><textarea id="p-notes" placeholder="Owner-managed, reconciles manually, no dedicated ops person..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="addProspect()">Add to pipeline</button>
+            <button class="btn" onclick="switchInner('pipe','kanban')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNTS -->
+    <div id="panel-accounts" class="panel">
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInner('acc','list')">All accounts</button>
+        <button class="inner-tab" onclick="switchInner('acc','add')">+ New account</button>
+      </div>
+      <div id="acc-list" class="inner-panel-acc">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl" id="accounts-table"></table>
+        </div>
+      </div>
+      <div id="acc-add" class="inner-panel-acc" style="display:none">
+        <div class="card">
+          <div class="card-title">New account (signed client)</div>
+          <div class="form-grid fg3">
+            <div class="form-group"><label>Account name *</label><input id="ac-name" placeholder="Nkosi Brokers (Pty) Ltd"></div>
+            <div class="form-group"><label>Primary contact</label><input id="ac-contact" placeholder="Jane Nkosi"></div>
+            <div class="form-group"><label>Vertical</label>
+              <select id="ac-vertical">
+                <option value="broker">Insurance Broker</option>
+                <option value="vapor">Vapor</option>
+                <option value="water">Water</option>
+                <option value="jelly">Jelly</option>
+                <option value="concert">Concert</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Phone</label><input id="ac-phone" placeholder="+27 82 000 0000"></div>
+            <div class="form-group"><label>Email</label><input id="ac-email" placeholder="jane@firm.co.za"></div>
+            <div class="form-group"><label>Tier</label>
+              <select id="ac-tier"><option>Starter Managed</option><option selected>Standard Managed</option><option>Ownership Buy-Out</option></select>
+            </div>
+            <div class="form-group"><label>Setup fee (R)</label><input id="ac-setup" type="number" placeholder="12000"></div>
+            <div class="form-group"><label>Monthly fee (R)</label><input id="ac-monthly" type="number" placeholder="3500"></div>
+            <div class="form-group"><label>Start date</label><input id="ac-start" type="date"></div>
+          </div>
+          <div class="form-grid" style="grid-template-columns:1fr">
+            <div class="form-group"><label>Data export type / notes</label><textarea id="ac-notes" placeholder="SharePoint folder, commission CSV monthly, gateway on MD's laptop..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="addAccount()">Create account</button>
+            <button class="btn" onclick="switchInner('acc','list')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER BOOK -->
+    <div id="panel-orders" class="panel">
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInner('ord','list')">All orders</button>
+        <button class="inner-tab" onclick="switchInner('ord','add')">+ New order</button>
+      </div>
+      <div id="ord-list" class="inner-panel-ord">
+        <div class="metrics-row metrics-4" id="order-metrics"></div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl" id="orders-table"></table>
+        </div>
+      </div>
+      <div id="ord-add" class="inner-panel-ord" style="display:none">
+        <div class="card">
+          <div class="card-title">New order / engagement</div>
+          <div class="form-grid fg3">
+            <div class="form-group"><label>Account *</label><select id="or-account" id="or-account"></select></div>
+            <div class="form-group"><label>Order type</label>
+              <select id="or-type">
+                <option>Setup — Standard Pack</option>
+                <option>Setup — Starter Pack</option>
+                <option>Setup — Buy-Out</option>
+                <option>Monthly Managed</option>
+                <option>Expected Commission Upgrade</option>
+                <option>Change Control</option>
+                <option>Ad-hoc Consulting</option>
+                <option>Vapor — Supply</option>
+                <option>Water — Supply</option>
+                <option>Jelly — Supply</option>
+                <option>Concert — Event</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Vertical</label>
+              <select id="or-vertical">
+                <option value="broker">Insurance Broker</option>
+                <option value="vapor">Vapor</option>
+                <option value="water">Water</option>
+                <option value="jelly">Jelly</option>
+                <option value="concert">Concert</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Amount (R)</label><input id="or-amount" type="number" placeholder="12000"></div>
+            <div class="form-group"><label>Date</label><input id="or-date" type="date"></div>
+            <div class="form-group"><label>Status</label>
+              <select id="or-status">
+                <option>Quoted</option><option>Invoiced</option><option>Part-paid</option>
+                <option>Paid</option><option>In delivery</option><option>Delivered</option><option>Cancelled</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Invoice #</label><input id="or-invoice" placeholder="INV-001"></div>
+            <div class="form-group"><label>Due date</label><input id="or-due" type="date"></div>
+            <div class="form-group"><label>Recurring?</label>
+              <select id="or-recurring"><option value="no">One-off</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option></select>
+            </div>
+          </div>
+          <div class="form-grid" style="grid-template-columns:1fr">
+            <div class="form-group"><label>Notes</label><textarea id="or-notes" placeholder="Commission statement mapping, 2-week setup..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="addOrder()">Add order</button>
+            <button class="btn" onclick="switchInner('ord','list')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROPOSALS -->
+    <div id="panel-proposals" class="panel">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px">
+        <div>
+          <div class="section-label">Build proposal</div>
+          <div class="card">
+            <div class="form-grid fg2">
+              <div class="form-group"><label>Firm name</label><input id="pr-firm" placeholder="Nkosi Brokers" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Contact name</label><input id="pr-contact" placeholder="Jane Nkosi" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Setup fee (R)</label><input id="pr-setup" type="number" placeholder="12000" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Monthly fee (R)</label><input id="pr-monthly" type="number" placeholder="3500" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Est. active policies</label><input id="pr-policies" placeholder="350" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Primary insurer</label><input id="pr-insurer" placeholder="Sanlam" oninput="renderProposal()"></div>
+              <div class="form-group"><label>Tier</label>
+                <select id="pr-tier" onchange="renderProposal()"><option>Starter Managed</option><option selected>Standard Managed</option><option>Ownership Buy-Out</option></select>
+              </div>
+              <div class="form-group"><label>Refresh type</label>
+                <select id="pr-refresh" onchange="renderProposal()"><option>monthly manual export</option><option>automated monthly refresh</option></select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px"><label>Est. recoverable commission (R)</label><input id="pr-recover" placeholder="25000" oninput="renderProposal()"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-sm" onclick="copyProposal()">Copy text</button>
+              <button class="btn btn-sm btn-primary" onclick="saveProposal()">Save to proposals list</button>
+            </div>
+          </div>
+          <div class="section-label" style="margin-top:14px">Saved proposals</div>
+          <div id="proposals-list"></div>
+        </div>
+        <div>
+          <div class="section-label">Live preview</div>
+          <div class="proposal-preview" id="proposal-output">Fill in fields to generate proposal.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-TOUCH SEQUENCE -->
+    <div id="panel-sequence" class="panel">
+      <div class="note">Run this sequence exactly. No improvising. 50 prospects → 8–12 responses → 4–6 demos → 1–2 clients in 30 days.</div>
+      <div id="sequence-content"></div>
+    </div>
+
+    <!-- CALL SCRIPTS -->
+    <div id="panel-scripts" class="panel">
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInner('scr','discovery')">Discovery call (15 min)</button>
+        <button class="inner-tab" onclick="switchInner('scr','demo')">Demo script (30 min)</button>
+        <button class="inner-tab" onclick="switchInner('scr','objections')">Objection handlers</button>
+      </div>
+      <div id="scr-discovery" class="inner-panel-scr"><div id="script-discovery"></div></div>
+      <div id="scr-demo" class="inner-panel-scr" style="display:none"><div id="script-demo"></div></div>
+      <div id="scr-objections" class="inner-panel-scr" style="display:none"><div id="script-objections"></div></div>
+    </div>
+
+    <!-- DELIVERIES -->
+    <div id="panel-deliveries" class="panel">
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInner('del','list')">All deliveries</button>
+        <button class="inner-tab" onclick="switchInner('del','add')">+ Log delivery</button>
+      </div>
+      <div id="del-list" class="inner-panel-del">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table class="tbl" id="deliveries-table"></table>
+        </div>
+      </div>
+      <div id="del-add" class="inner-panel-del" style="display:none">
+        <div class="card">
+          <div class="card-title">Log delivery milestone</div>
+          <div class="form-grid fg3">
+            <div class="form-group"><label>Account</label><select id="dl-account"></select></div>
+            <div class="form-group"><label>Milestone</label>
+              <select id="dl-milestone">
+                <option>Data intake received</option>
+                <option>Schema validated</option>
+                <option>PBIX built</option>
+                <option>Gateway configured</option>
+                <option>Refresh stable (7 days)</option>
+                <option>Dashboard live</option>
+                <option>First monthly pack delivered</option>
+                <option>Expected model added</option>
+                <option>Testimonial received</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Date</label><input id="dl-date" type="date"></div>
+            <div class="form-group"><label>Status</label>
+              <select id="dl-status"><option>Pending</option><option>In progress</option><option>Done</option><option>Blocked</option></select>
+            </div>
+            <div class="form-group" style="grid-column:span 2"><label>Notes</label><input id="dl-notes" placeholder="Any blockers or context..."></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="addDelivery()">Log milestone</button>
+            <button class="btn" onclick="switchInner('del','list')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div id="panel-activity" class="panel">
+      <div class="card">
+        <div class="card-title">Activity log (all events)</div>
+        <div id="full-activity-log"></div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box">
+    <div id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModalDirect()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA STORE
+// ═══════════════════════════════════════
+var DB = {
+  prospects: [],
+  accounts: [],
+  orders: [],
+  deliveries: [],
+  proposals: [],
+  activity: []
+};
+
+var VERTICALS = {broker:'Insurance Broker',vapor:'Vapor',water:'Water',jelly:'Jelly',concert:'Concert'};
+var VERT_CLASS = {broker:'v-broker',vapor:'v-vapor',water:'v-water',jelly:'v-jelly',concert:'v-concert'};
+var PIPE_STAGES = ['Cold','Touched','Replied','Demo booked','Demo done','Proposal sent','Negotiating','Signed','Lost'];
+var PIPE_COLORS = ['p-gray','p-gray','p-amber','p-blue','p-purple','p-coral','p-amber','p-teal','p-red'];
+var ORDER_STATUS_COLORS = {Quoted:'p-gray',Invoiced:'p-blue','Part-paid':'p-amber',Paid:'p-teal','In delivery':'p-purple',Delivered:'p-teal',Cancelled:'p-red'};
+var DELIVERY_STATUS_COLORS = {Pending:'p-gray','In progress':'p-amber',Done:'p-teal',Blocked:'p-red'};
+
+function save(){
+  try{localStorage.setItem('Vantix_ops',JSON.stringify(DB));}catch(e){}
+  document.getElementById('save-indicator').textContent='Saved '+new Date().toLocaleTimeString();
+}
+function load(){
+  try{
+    var d=localStorage.getItem('Vantix_ops');
+    if(d){var p=JSON.parse(d);Object.assign(DB,p);}
+  }catch(e){}
+}
+function logActivity(action,detail,type){
+  DB.activity.unshift({id:Date.now(),action:action,detail:detail,type:type||'info',ts:new Date().toISOString()});
+  if(DB.activity.length>200)DB.activity=DB.activity.slice(0,200);
+  save();
+}
+function fmtDate(d){if(!d)return'—';var dt=new Date(d);return dt.toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtMoney(n){return'R'+Math.round(Number(n)||0).toLocaleString('en-ZA');}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function today(){return new Date().toISOString().slice(0,10);}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+var CURRENT_NAV='dashboard';
+function nav(id){
+  CURRENT_NAV=id;
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+  var panel=document.getElementById('panel-'+id);
+  if(panel)panel.classList.add('active');
+  var items=document.querySelectorAll('.nav-item');
+  items.forEach(function(n){if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');});
+  var titles={dashboard:'Dashboard',pipeline:'Pipeline / CRM',accounts:'Accounts',orders:'Order book',proposals:'Proposals',sequence:'7-Touch sequence',scripts:'Call scripts',deliveries:'Deliveries',activity:'Activity log'};
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+  renderPage(id);
+}
+
+function switchInner(prefix,id){
+  var panels=document.querySelectorAll('.inner-panel-'+prefix);
+  panels.forEach(function(p){p.style.display='none'});
+  var el=document.getElementById(prefix+'-'+id);
+  if(el)el.style.display='block';
+  var tabs=document.querySelectorAll('.inner-tab');
+  // match by text content approximation — just toggle active on clicked
+}
+
+function renderPage(id){
+  if(id==='dashboard')renderDashboard();
+  if(id==='pipeline')renderPipeline();
+  if(id==='accounts')renderAccounts();
+  if(id==='orders')renderOrders();
+  if(id==='deliveries')renderDeliveries();
+  if(id==='activity')renderActivity();
+  if(id==='proposals')renderProposal();
+  if(id==='sequence')renderSequence();
+  if(id==='scripts')renderScripts();
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+function renderDashboard(){
+  var totalMRR=DB.accounts.reduce(function(s,a){return s+(Number(a.monthly)||0)},0);
+  var pipeVal=DB.prospects.filter(function(p){return p.status>=5&&p.status<7}).reduce(function(s,p){return s+(Number(p.value)||0)},0);
+  var signed=DB.prospects.filter(function(p){return p.status===7}).length;
+  var openOrders=DB.orders.filter(function(o){return o.status==='Invoiced'||o.status==='Quoted'}).length;
+  document.getElementById('dash-metrics').innerHTML=
+    metric('MRR','metric-value',fmtMoney(totalMRR),'from '+DB.accounts.length+' active accounts',totalMRR>0?'delta-up':'')+
+    metric('Pipeline','metric-value',fmtMoney(pipeVal),DB.prospects.filter(function(p){return p.status>=5&&p.status<8}).length+' proposals out','')+
+    metric('Signed clients','metric-value',signed,'total in CRM','')+
+    metric('Open invoices','metric-value',openOrders,'orders awaiting payment',openOrders>0?'delta-dn':'');
+
+  // Funnel
+  var stages=[0,0,0,0,0,0,0,0,0];
+  DB.prospects.forEach(function(p){stages[Math.min(p.status,8)]++;});
+  var funnelHtml='';
+  var funnelData=[
+    {label:'Cold list',count:stages[0],target:50,color:'#9b9a96'},
+    {label:'Touched (1-3)',count:stages[1]+stages[2],target:20,color:'#EF9F27'},
+    {label:'Demo booked/done',count:stages[3]+stages[4],target:8,color:'#7F77DD'},
+    {label:'Proposal sent',count:stages[5]+stages[6],target:4,color:'#D85A30'},
+    {label:'Signed',count:stages[7],target:2,color:'#1D9E75'},
+  ];
+  funnelData.forEach(function(f){
+    var pct=Math.min(Math.round(f.count/f.target*100),100);
+    funnelHtml+='<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px"><span>'+f.label+'</span><span>'+f.count+' / '+f.target+'</span></div><div class="prog-wrap"><div class="prog-fill" style="width:'+pct+'%;background:'+f.color+'"></div></div></div>';
+  });
+  document.getElementById('dash-funnel').innerHTML=funnelHtml;
+
+  // Verticals
+  var vCounts={};
+  DB.accounts.forEach(function(a){vCounts[a.vertical]=(vCounts[a.vertical]||0)+1;});
+  var vHtml='<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  Object.keys(VERTICALS).forEach(function(k){
+    vHtml+='<div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border-radius:var(--r-md);padding:8px 12px;flex:1;min-width:80px"><span class="pill '+VERT_CLASS[k]+'" style="font-size:10px">'+VERTICALS[k]+'</span><span style="font-size:20px;font-weight:600">'+(vCounts[k]||0)+'</span></div>';
+  });
+  vHtml+='</div>';
+  document.getElementById('dash-verticals').innerHTML=vHtml;
+
+  // Actions
+  var actions=[];
+  var cold=DB.prospects.filter(function(p){return p.status===0;});
+  if(cold.length) actions.push({text:'Send Touch 1 to '+cold.length+' cold prospect'+(cold.length>1?'s':''),color:'#1D9E75'});
+  var needsFollow=DB.prospects.filter(function(p){return p.status>0&&p.status<5;});
+  if(needsFollow.length) actions.push({text:'Follow up: '+needsFollow.length+' in active sequence',color:'#EF9F27'});
+  var demosDone=DB.prospects.filter(function(p){return p.status===4;});
+  if(demosDone.length) actions.push({text:'Send proposal to '+demosDone.length+' demo-done prospect'+(demosDone.length>1?'s':''),color:'#D85A30'});
+  var overdueOrders=DB.orders.filter(function(o){return o.due&&o.due<today()&&o.status!=='Paid'&&o.status!=='Delivered'&&o.status!=='Cancelled';});
+  if(overdueOrders.length) actions.push({text:overdueOrders.length+' overdue invoice'+(overdueOrders.length>1?'s':''),color:'#E24B4A'});
+  if(!actions.length) actions.push({text:'Nothing urgent — keep pushing daily touches',color:'#9b9a96'});
+  document.getElementById('dash-actions').innerHTML=actions.map(function(a){
+    return '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:0.5px solid var(--border)"><span style="color:'+a.color+';font-size:16px;flex-shrink:0;margin-top:-1px">›</span><span style="font-size:13px;color:var(--text)">'+a.text+'</span></div>';
+  }).join('').replace(/border-bottom[^;]+;"/,'""');
+
+  // Recent activity
+  var recent=DB.activity.slice(0,8);
+  document.getElementById('dash-recent-activity').innerHTML=recent.length?recent.map(function(a){
+    return '<div class="activity-item"><div class="activity-dot" style="background:var(--teal)"></div><div class="activity-body">'+a.action+'<div class="activity-time">'+a.detail+' · '+fmtDate(a.ts)+'</div></div></div>';
+  }).join(''):'<div style="font-size:13px;color:var(--text3);text-align:center;padding:12px 0">No activity yet</div>';
+}
+
+function metric(label,cls,val,sub,deltaCls){
+  return '<div class="metric"><div class="metric-label">'+label+'</div><div class="'+cls+'">'+val+'</div><div class="metric-sub '+deltaCls+'">'+sub+'</div></div>';
+}
+
+// ═══════════════════════════════════════
+// PROSPECTS / PIPELINE
+// ═══════════════════════════════════════
+function addProspect(){
+  var name=document.getElementById('p-name').value.trim();
+  var firm=document.getElementById('p-firm').value.trim();
+  if(!name&&!firm){alert('Enter name or firm');return;}
+  var p={
+    id:uid(),name:name||'Unknown',firm:firm||'Unknown Firm',
+    vertical:document.getElementById('p-vertical').value,
+    phone:document.getElementById('p-phone').value.trim(),
+    email:document.getElementById('p-email').value.trim(),
+    link:document.getElementById('p-link').value.trim(),
+    size:document.getElementById('p-size').value,
+    insurers:document.getElementById('p-insurers').value.trim(),
+    value:document.getElementById('p-value').value||0,
+    notes:document.getElementById('p-notes').value.trim(),
+    status:0,created:today()
+  };
+  DB.prospects.push(p);
+  logActivity('Prospect added',p.name+' — '+p.firm,'prospect');
+  save();
+  ['p-name','p-firm','p-phone','p-email','p-link','p-insurers','p-notes','p-value'].forEach(function(id){document.getElementById(id).value='';});
+  switchInner('pipe','kanban');
+  renderPipeline();
+}
+
+function openAddProspect(){switchInner('pipe','add');}
+
+function renderPipeline(){
+  renderKanban();
+  renderProspectsTable();
+}
+
+function renderKanban(){
+  var board=document.getElementById('kanban-board');
+  if(!board)return;
+  var cols={};
+  PIPE_STAGES.forEach(function(s,i){cols[i]=[];});
+  DB.prospects.forEach(function(p){cols[Math.min(p.status,8)].push(p);});
+  board.innerHTML=PIPE_STAGES.map(function(stage,i){
+    var cards=cols[i];
+    return '<div class="k-col"><div class="k-col-header"><span>'+stage+'</span><span class="k-count">'+cards.length+'</span></div>'+
+      cards.map(function(p){
+        return '<div class="k-card" onclick="openProspect(\''+p.id+'\')">'+
+          '<div class="k-card-name">'+p.name+'</div>'+
+          '<div class="k-card-sub">'+p.firm+'</div>'+
+          '<div class="k-card-foot"><span class="pill '+VERT_CLASS[p.vertical||'broker']+'" style="font-size:10px">'+(VERTICALS[p.vertical]||'Broker')+'</span>'+(p.value?'<span style="font-size:11px;color:var(--text3)">'+fmtMoney(p.value)+'/mo</span>':'')+'</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+}
+
+function renderProspectsTable(){
+  var t=document.getElementById('prospects-table');
+  if(!t)return;
+  t.innerHTML='<thead><tr><th>Name</th><th>Firm</th><th>Vertical</th><th>Stage</th><th>Value</th><th>Created</th><th></th></tr></thead><tbody>'+
+    (DB.prospects.length?DB.prospects.map(function(p){
+      return '<tr><td style="font-weight:500">'+p.name+'</td><td>'+p.firm+'</td><td><span class="pill '+VERT_CLASS[p.vertical||'broker']+'" style="font-size:10px">'+(VERTICALS[p.vertical]||'Broker')+'</span></td>'+
+        '<td><select onchange="updateProspectStatus(\''+p.id+'\',this.value)" style="font-size:11px;padding:3px 6px;width:auto">'+
+          PIPE_STAGES.map(function(s,i){return'<option value="'+i+'"'+(p.status===i?' selected':'')+'>'+s+'</option>';}).join('')+
+        '</select></td>'+
+        '<td>'+(p.value?fmtMoney(p.value)+'/mo':'—')+'</td><td>'+fmtDate(p.created)+'</td>'+
+        '<td><button class="tbl-action" onclick="openProspect(\''+p.id+'\')">View</button> <button class="tbl-action tbl-del" onclick="deleteProspect(\''+p.id+'\')">Del</button></td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No prospects yet</td></tr>')+
+  '</tbody>';
+}
+
+function updateProspectStatus(id,val){
+  var p=DB.prospects.find(function(x){return x.id===id;});
+  if(!p)return;
+  p.status=parseInt(val);
+  logActivity('Prospect stage updated',p.name+' → '+PIPE_STAGES[p.status],'prospect');
+  save();
+  renderDashboard();
+}
+
+function deleteProspect(id){
+  if(!confirm('Delete this prospect?'))return;
+  DB.prospects=DB.prospects.filter(function(p){return p.id!==id;});
+  logActivity('Prospect deleted','id:'+id,'prospect');save();renderPipeline();
+}
+
+function openProspect(id){
+  var p=DB.prospects.find(function(x){return x.id===id;});
+  if(!p)return;
+  var html='<div class="form-grid fg2" style="margin-bottom:12px">'+
+    '<div><div class="section-label">Firm</div><div style="font-size:15px;font-weight:500">'+p.firm+'</div></div>'+
+    '<div><div class="section-label">Vertical</div><span class="pill '+VERT_CLASS[p.vertical||'broker']+'">'+(VERTICALS[p.vertical]||'Broker')+'</span></div>'+
+    '<div><div class="section-label">Phone</div><div style="font-size:13px">'+(p.phone||'—')+'</div></div>'+
+    '<div><div class="section-label">Email</div><div style="font-size:13px">'+(p.email||'—')+'</div></div>'+
+    '<div><div class="section-label">Deal value</div><div style="font-size:13px">'+(p.value?fmtMoney(p.value)+'/mo':'—')+'</div></div>'+
+    '<div><div class="section-label">Staff size</div><div style="font-size:13px">'+(p.size||'—')+'</div></div>'+
+  '</div>'+
+  '<div class="divider"></div>'+
+  '<div class="section-label">Stage</div>'+
+  '<select onchange="updateProspectStatus(\''+p.id+'\',this.value)" style="margin-bottom:12px">'+PIPE_STAGES.map(function(s,i){return'<option value="'+i+'"'+(p.status===i?' selected':'')+'>'+s+'</option>';}).join('')+'</select>'+
+  (p.notes?'<div class="section-label">Notes</div><div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">'+p.notes+'</div>':'')+
+  (p.insurers?'<div class="section-label">Insurers / Book</div><div style="font-size:13px;color:var(--text2);margin-bottom:12px">'+p.insurers+'</div>':'')+
+  '<div class="section-label">Quick actions</div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+    '<button class="btn btn-sm btn-primary" onclick="convertToAccount(\''+p.id+'\');closeModalDirect()">Convert to account</button>'+
+    '<button class="btn btn-sm" onclick="closeModalDirect();nav(\'proposals\')">Build proposal</button>'+
+    '<button class="btn btn-sm" onclick="deleteProspect(\''+p.id+'\');closeModalDirect()">Delete</button>'+
+  '</div>';
+  openModal(p.name+' — '+p.firm,html);
+}
+
+function convertToAccount(pid){
+  var p=DB.prospects.find(function(x){return x.id===pid;});
+  if(!p)return;
+  p.status=7;
+  DB.accounts.push({id:uid(),name:p.firm,contact:p.name,vertical:p.vertical||'broker',phone:p.phone,email:p.email,tier:'Standard Managed',monthly:p.value||3500,setup:0,start:today(),notes:p.notes,prospectId:pid});
+  logActivity('Account created from prospect',p.firm,'account');save();renderPipeline();renderAccounts();
+}
+
+// ═══════════════════════════════════════
+// ACCOUNTS
+// ═══════════════════════════════════════
+function addAccount(){
+  var name=document.getElementById('ac-name').value.trim();
+  if(!name){alert('Account name required');return;}
+  var a={
+    id:uid(),name:name,contact:document.getElementById('ac-contact').value.trim(),
+    vertical:document.getElementById('ac-vertical').value,
+    phone:document.getElementById('ac-phone').value.trim(),
+    email:document.getElementById('ac-email').value.trim(),
+    tier:document.getElementById('ac-tier').value,
+    setup:document.getElementById('ac-setup').value||0,
+    monthly:document.getElementById('ac-monthly').value||0,
+    start:document.getElementById('ac-start').value||today(),
+    notes:document.getElementById('ac-notes').value.trim()
+  };
+  DB.accounts.push(a);
+  logActivity('Account added',a.name,'account');save();
+  switchInner('acc','list');renderAccounts();
+}
+
+function renderAccounts(){
+  populateAccountSelects();
+  var t=document.getElementById('accounts-table');
+  if(!t)return;
+  t.innerHTML='<thead><tr><th>Account</th><th>Contact</th><th>Vertical</th><th>Tier</th><th>MRR</th><th>Start</th><th></th></tr></thead><tbody>'+
+    (DB.accounts.length?DB.accounts.map(function(a){
+      return '<tr><td style="font-weight:500">'+a.name+'</td><td>'+a.contact+'</td>'+
+        '<td><span class="pill '+VERT_CLASS[a.vertical||'broker']+'" style="font-size:10px">'+(VERTICALS[a.vertical]||'Broker')+'</span></td>'+
+        '<td><span class="pill p-gray" style="font-size:10px">'+a.tier+'</span></td>'+
+        '<td>'+fmtMoney(a.monthly)+'/mo</td><td>'+fmtDate(a.start)+'</td>'+
+        '<td><button class="tbl-action" onclick="openAccount(\''+a.id+'\')">View</button> <button class="tbl-action tbl-del" onclick="deleteAccount(\''+a.id+'\')">Del</button></td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">No accounts yet</td></tr>')+
+  '</tbody>';
+}
+
+function openAccount(id){
+  var a=DB.accounts.find(function(x){return x.id===id;});
+  if(!a)return;
+  var acOrders=DB.orders.filter(function(o){return o.accountId===id;});
+  var acDeliveries=DB.deliveries.filter(function(d){return d.accountId===id;});
+  var html='<div class="form-grid fg3" style="margin-bottom:12px">'+
+    '<div><div class="section-label">Vertical</div><span class="pill '+VERT_CLASS[a.vertical||'broker']+'">'+(VERTICALS[a.vertical]||'Broker')+'</span></div>'+
+    '<div><div class="section-label">Tier</div><div style="font-size:13px">'+a.tier+'</div></div>'+
+    '<div><div class="section-label">MRR</div><div style="font-size:15px;font-weight:600;color:var(--teal)">'+fmtMoney(a.monthly)+'/mo</div></div>'+
+    '<div><div class="section-label">Phone</div><div style="font-size:13px">'+(a.phone||'—')+'</div></div>'+
+    '<div><div class="section-label">Email</div><div style="font-size:13px">'+(a.email||'—')+'</div></div>'+
+    '<div><div class="section-label">Start date</div><div style="font-size:13px">'+fmtDate(a.start)+'</div></div>'+
+  '</div>'+
+  (a.notes?'<div class="section-label">Notes</div><div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">'+a.notes+'</div>':'')+
+  '<div class="divider"></div>'+
+  '<div class="section-label">Orders ('+acOrders.length+')</div>'+
+  (acOrders.length?'<table class="tbl" style="margin-bottom:12px"><thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>'+acOrders.map(function(o){return'<tr><td>'+o.type+'</td><td>'+fmtMoney(o.amount)+'</td><td><span class="pill '+(ORDER_STATUS_COLORS[o.status]||'p-gray')+'" style="font-size:10px">'+o.status+'</span></td><td>'+fmtDate(o.date)+'</td></tr>';}).join('')+'</tbody></table>':'<div style="font-size:12px;color:var(--text3);margin-bottom:12px">No orders yet</div>')+
+  '<div class="section-label">Delivery milestones ('+acDeliveries.length+')</div>'+
+  (acDeliveries.length?acDeliveries.map(function(d){return'<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:0.5px solid var(--border)"><span>'+d.milestone+'</span><span class="pill '+(DELIVERY_STATUS_COLORS[d.status]||'p-gray')+'" style="font-size:10px">'+d.status+'</span></div>';}).join(''):'<div style="font-size:12px;color:var(--text3)">No milestones logged</div>');
+  openModal(a.name,html);
+}
+
+function deleteAccount(id){
+  if(!confirm('Delete this account? Orders and deliveries will remain.'))return;
+  DB.accounts=DB.accounts.filter(function(a){return a.id!==id;});
+  logActivity('Account deleted','id:'+id,'account');save();renderAccounts();
+}
+
+function populateAccountSelects(){
+  ['or-account','dl-account'].forEach(function(selId){
+    var sel=document.getElementById(selId);
+    if(!sel)return;
+    sel.innerHTML='<option value="">— Select account —</option>'+DB.accounts.map(function(a){return'<option value="'+a.id+'">'+a.name+'</option>';}).join('');
+  });
+}
+
+// ═══════════════════════════════════════
+// ORDERS
+// ═══════════════════════════════════════
+function addOrder(){
+  var accountId=document.getElementById('or-account').value;
+  var amount=document.getElementById('or-amount').value;
+  if(!amount){alert('Amount required');return;}
+  var o={
+    id:uid(),accountId:accountId,
+    type:document.getElementById('or-type').value,
+    vertical:document.getElementById('or-vertical').value,
+    amount:amount,date:document.getElementById('or-date').value||today(),
+    status:document.getElementById('or-status').value,
+    invoice:document.getElementById('or-invoice').value.trim(),
+    due:document.getElementById('or-due').value,
+    recurring:document.getElementById('or-recurring').value,
+    notes:document.getElementById('or-notes').value.trim()
+  };
+  DB.orders.push(o);
+  var acc=DB.accounts.find(function(a){return a.id===accountId;});
+  logActivity('Order added',o.type+' — '+fmtMoney(o.amount)+(acc?' for '+acc.name:''),'order');
+  save();switchInner('ord','list');renderOrders();
+}
+
+function openAddOrder(){nav('orders');switchInner('ord','add');populateAccountSelects();}
+
+function renderOrders(){
+  populateAccountSelects();
+  var orders=DB.orders;
+  var totalRev=orders.filter(function(o){return o.status==='Paid'||o.status==='Delivered';}).reduce(function(s,o){return s+(Number(o.amount)||0);},0);
+  var outstanding=orders.filter(function(o){return o.status==='Invoiced'||o.status==='Quoted';}).reduce(function(s,o){return s+(Number(o.amount)||0);},0);
+  var inDel=orders.filter(function(o){return o.status==='In delivery';}).length;
+  var overdue=orders.filter(function(o){return o.due&&o.due<today()&&o.status!=='Paid'&&o.status!=='Delivered'&&o.status!=='Cancelled';}).length;
+  document.getElementById('order-metrics').innerHTML=
+    metric('Total collected','metric-value',fmtMoney(totalRev),'paid orders','')+
+    metric('Outstanding','metric-value',fmtMoney(outstanding),'invoiced / quoted',outstanding>0?'delta-dn':'')+
+    metric('In delivery','metric-value',inDel,'active engagements','')+
+    metric('Overdue','metric-value',overdue,'past due date',overdue>0?'delta-dn delta-up':'');
+
+  var t=document.getElementById('orders-table');
+  if(!t)return;
+  t.innerHTML='<thead><tr><th>Account</th><th>Type</th><th>Vertical</th><th>Amount</th><th>Status</th><th>Invoice</th><th>Date</th><th></th></tr></thead><tbody>'+
+    (orders.length?orders.slice().reverse().map(function(o){
+      var acc=DB.accounts.find(function(a){return a.id===o.accountId;});
+      var isOverdue=o.due&&o.due<today()&&o.status!=='Paid'&&o.status!=='Delivered'&&o.status!=='Cancelled';
+      return '<tr'+(isOverdue?' style="background:var(--red-bg)"':'')+'>'+
+        '<td style="font-weight:500">'+(acc?acc.name:'—')+'</td><td>'+o.type+'</td>'+
+        '<td><span class="pill '+VERT_CLASS[o.vertical||'broker']+'" style="font-size:10px">'+(VERTICALS[o.vertical]||'Broker')+'</span></td>'+
+        '<td>'+fmtMoney(o.amount)+(o.recurring!=='no'?'<span style="font-size:10px;color:var(--text3)"> /'+o.recurring+'</span>':'')+'</td>'+
+        '<td><select onchange="updateOrderStatus(\''+o.id+'\',this.value)" style="font-size:11px;padding:3px;width:auto">'+
+          ['Quoted','Invoiced','Part-paid','Paid','In delivery','Delivered','Cancelled'].map(function(s){return'<option'+(o.status===s?' selected':'')+'>'+s+'</option>';}).join('')+
+        '</select></td>'+
+        '<td>'+(o.invoice||'—')+'</td><td>'+fmtDate(o.date)+'</td>'+
+        '<td><button class="tbl-action tbl-del" onclick="deleteOrder(\''+o.id+'\')">Del</button></td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px">No orders yet</td></tr>')+
+  '</tbody>';
+}
+
+function updateOrderStatus(id,val){
+  var o=DB.orders.find(function(x){return x.id===id;});
+  if(!o)return;
+  o.status=val;
+  logActivity('Order status updated',o.type+' → '+val,'order');save();renderOrders();renderDashboard();
+}
+
+function deleteOrder(id){
+  if(!confirm('Delete this order?'))return;
+  DB.orders=DB.orders.filter(function(o){return o.id!==id;});
+  save();renderOrders();
+}
+
+// ═══════════════════════════════════════
+// PROPOSALS
+// ═══════════════════════════════════════
+function renderProposal(){
+  renderProposalPreview();
+  renderProposalsList();
+}
+
+function renderProposalPreview(){
+  var firm=document.getElementById('pr-firm').value||'[FIRM NAME]';
+  var contact=document.getElementById('pr-contact').value||'[Contact]';
+  var setup=document.getElementById('pr-setup').value||'[X]';
+  var monthly=document.getElementById('pr-monthly').value||'[Y]';
+  var policies=document.getElementById('pr-policies').value||'[N]';
+  var insurer=document.getElementById('pr-insurer').value||'[Insurer]';
+  var tier=document.getElementById('pr-tier').value;
+  var refresh=document.getElementById('pr-refresh').value;
+  var recover=document.getElementById('pr-recover').value||'[Z]';
+  var d=today();
+  document.getElementById('proposal-output').textContent=
+'COMMISSION RECONCILIATION PACK\n'+firm.toUpperCase()+'\nPrepared for: '+contact+'\nDate: '+d+'\nPackage: '+tier+'\n\n'+
+'WHAT YOU GET\n'+
+'— Power BI dashboard: commission waterfall, exception report,\n  recovery tracker, lapse signals\n'+
+'— Setup and data mapping: 2 weeks\n'+
+'— Monthly data refresh: '+refresh+'\n'+
+'— Monthly management pack (PDF export)\n'+
+'— Support: email, response within 24 hours\n'+
+'— All data remains in your environment (client-hosted)\n\n'+
+'INVESTMENT\n'+
+'— Setup fee: R'+setup+' (once-off, due on signature)\n'+
+'— Monthly subscription: R'+monthly+'/month (invoiced 1st)\n'+
+'— Minimum term: '+(tier==='Starter Managed'?'3 months':tier==='Standard Managed'?'6–12 months':'Once-off')+'\n\n'+
+'FIRST MONTH OUTCOME\n'+
+'— Week 1–2: Setup and data mapping ('+insurer+' statements)\n'+
+'— Week 3: First reconciliation run (~'+policies+' active policies)\n'+
+'— Expected exceptions in first run: 5–10\n'+
+'— Estimated recoverable commission: R'+recover+'\n\n'+
+'SCOPE BOUNDARIES\n'+
+'— Standard pack only. Bespoke analytics quoted separately.\n'+
+'— No new data sources without change control.\n\n'+
+'TO PROCEED\n'+
+'Reply "go" — I will send invoice and onboarding checklist.\n'+
+'Questions: [your email]';
+}
+
+function saveProposal(){
+  var firm=document.getElementById('pr-firm').value||'Unnamed';
+  var text=document.getElementById('proposal-output').textContent;
+  DB.proposals.push({id:uid(),firm:firm,text:text,date:today()});
+  logActivity('Proposal saved',firm,'proposal');save();renderProposalsList();
+}
+
+function renderProposalsList(){
+  var el=document.getElementById('proposals-list');
+  if(!el)return;
+  el.innerHTML=DB.proposals.length?DB.proposals.slice().reverse().map(function(p){
+    return '<div class="card" style="padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'+
+      '<div><div style="font-size:13px;font-weight:500">'+p.firm+'</div><div style="font-size:11px;color:var(--text3)">'+fmtDate(p.date)+'</div></div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button class="btn btn-sm" onclick="viewProposal(\''+p.id+'\')">View</button>'+
+        '<button class="btn btn-sm tbl-del" onclick="deleteProposal(\''+p.id+'\')">Del</button>'+
+      '</div>'+
+    '</div>';
+  }).join(''):'<div style="font-size:13px;color:var(--text3);text-align:center;padding:16px">No saved proposals</div>';
+}
+
+function viewProposal(id){
+  var p=DB.proposals.find(function(x){return x.id===id;});
+  if(!p)return;
+  openModal('Proposal — '+p.firm,'<div class="proposal-preview">'+p.text+'</div><div class="modal-footer" style="margin-top:12px"><button class="btn btn-sm" onclick="copyText(\''+id+'\')">Copy</button></div>');
+}
+
+function deleteProposal(id){
+  DB.proposals=DB.proposals.filter(function(p){return p.id!==id;});save();renderProposalsList();
+}
+
+function copyProposal(){
+  var text=document.getElementById('proposal-output').textContent;
+  navigator.clipboard?navigator.clipboard.writeText(text):fallbackCopy(text);
+  alert('Proposal copied to clipboard');
+}
+
+function copyText(id){
+  var p=DB.proposals.find(function(x){return x.id===id;});
+  if(!p)return;
+  navigator.clipboard?navigator.clipboard.writeText(p.text):fallbackCopy(p.text);
+}
+
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+}
+
+// ═══════════════════════════════════════
+// DELIVERIES
+// ═══════════════════════════════════════
+function addDelivery(){
+  var d={
+    id:uid(),accountId:document.getElementById('dl-account').value,
+    milestone:document.getElementById('dl-milestone').value,
+    date:document.getElementById('dl-date').value||today(),
+    status:document.getElementById('dl-status').value,
+    notes:document.getElementById('dl-notes').value.trim()
+  };
+  DB.deliveries.push(d);
+  var acc=DB.accounts.find(function(a){return a.id===d.accountId;});
+  logActivity('Milestone logged',d.milestone+(acc?' for '+acc.name:''),'delivery');
+  save();switchInner('del','list');renderDeliveries();
+}
+
+function renderDeliveries(){
+  populateAccountSelects();
+  var t=document.getElementById('deliveries-table');
+  if(!t)return;
+  t.innerHTML='<thead><tr><th>Account</th><th>Milestone</th><th>Date</th><th>Status</th><th>Notes</th><th></th></tr></thead><tbody>'+
+    (DB.deliveries.length?DB.deliveries.slice().reverse().map(function(d){
+      var acc=DB.accounts.find(function(a){return a.id===d.accountId;});
+      return '<tr><td style="font-weight:500">'+(acc?acc.name:'—')+'</td><td>'+d.milestone+'</td><td>'+fmtDate(d.date)+'</td>'+
+        '<td><span class="pill '+(DELIVERY_STATUS_COLORS[d.status]||'p-gray')+'" style="font-size:10px">'+d.status+'</span></td>'+
+        '<td style="color:var(--text2);font-size:12px">'+(d.notes||'—')+'</td>'+
+        '<td><button class="tbl-action tbl-del" onclick="deleteDelivery(\''+d.id+'\')">Del</button></td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px">No deliveries logged</td></tr>')+
+  '</tbody>';
+}
+
+function deleteDelivery(id){
+  DB.deliveries=DB.deliveries.filter(function(d){return d.id!==id;});save();renderDeliveries();
+}
+
+// ═══════════════════════════════════════
+// ACTIVITY
+// ═══════════════════════════════════════
+function renderActivity(){
+  var el=document.getElementById('full-activity-log');
+  if(!el)return;
+  var TYPE_COLOR={prospect:'var(--purple)',account:'var(--teal)',order:'var(--blue)',delivery:'var(--amber)',proposal:'var(--coral)',info:'var(--text3)'};
+  el.innerHTML=DB.activity.length?DB.activity.map(function(a){
+    return '<div class="activity-item"><div class="activity-dot" style="background:'+(TYPE_COLOR[a.type]||'var(--text3)')+'"></div><div class="activity-body"><span style="font-weight:500">'+a.action+'</span><div class="activity-time">'+a.detail+' · '+new Date(a.ts).toLocaleString('en-ZA')+'</div></div></div>';
+  }).join(''):'<div style="font-size:13px;color:var(--text3);text-align:center;padding:20px">No activity yet</div>';
+}
+
+// ═══════════════════════════════════════
+// 7-TOUCH SEQUENCE
+// ═══════════════════════════════════════
+var TOUCHES=[
+  {day:1,title:'LinkedIn connection request',platform:'LinkedIn · Send connection request with note',
+   script:'"Hi [Name] — I work with insurance brokers on commission reconciliation. Worth connecting."',
+   notes:['No pitch','Just connect']},
+  {day:2,title:'LinkedIn DM after connection',platform:'LinkedIn · DM immediately after they connect',
+   script:'"Thanks for connecting. I built a Power BI pack that flags insurer commission discrepancies automatically — most brokers I show it to find 3–8 exceptions per insurer per month they were never disputing. Runs in your environment. Worth 15 minutes to see if it fits your book?"',
+   notes:['Soft ask','Social proof baked in']},
+  {day:5,title:'LinkedIn follow-up',platform:'LinkedIn · Condition: No reply to Touch 2',
+   script:'"Quick follow-up — the first reconciliation run typically surfaces R15k–R40k in recoverable commission. Happy to demo with no data from you upfront. Still interested?"',
+   notes:['Anchors value (R15k–40k)','Removes risk: no data needed']},
+  {day:7,title:'Cold email',platform:'Email · Condition: No reply to Touches 1–3',
+   script:'Subject: Missing commission — quick question for [Firm Name]\n\nHi [Name],\n\nI help brokers reconcile commission statements against their policy books. Most find 5–10 discrepancies per insurer per month that never get disputed — not because they\'re not real, but because manually finding them takes too long.\n\nI built a dashboard that catches them automatically. 15-minute demo, no data needed from you upfront.\n\nWorth a look?\n\n[Your name]',
+   notes:['New channel (email)','Ultra-short']},
+  {day:10,title:'Email follow-up',platform:'Email · Condition: No reply to Touch 4',
+   script:'"One more follow-up — if now isn\'t the right time, just say so. If you\'re open to it, I can demo with dummy broker data so you see exactly what the exception report looks like before committing to anything."',
+   notes:['Permission to say no','Dummy data offer reduces friction']},
+  {day:12,title:'Phone call',platform:'Phone · First voice contact — keep it under 2 min',
+   script:'Opening: "Hi [Name], this is [Your name] — I sent you a couple of messages about commission reconciliation for brokers. I built a Power BI pack that catches insurer discrepancies automatically. Do you have 2 minutes now, or is there a better time this week?"\n\nIf they ask what is it: "It\'s a dashboard that compares what your insurer paid versus what your policy register says they should have paid. Most brokers find real money in the first run. I\'d rather show you in 15 minutes than explain it on the phone."',
+   notes:['Goal: book demo, not explain','Keep under 2 minutes']},
+  {day:15,title:'Final close-out',platform:'LinkedIn or Email · Last touch — no more after this',
+   script:'"Last reach-out from me — if commission reconciliation isn\'t a priority right now, no hard feelings. If it becomes one, I\'m at [email]. Happy to demo any time."',
+   notes:['No chase after this','Leaves door open permanently']},
+];
+function renderSequence(){
+  document.getElementById('sequence-content').innerHTML=TOUCHES.map(function(t,i){
+    return '<div class="touch-step">'+
+      '<div class="touch-num">'+(i+1)+'</div>'+
+      '<div class="touch-body">'+
+        '<div class="touch-title">'+t.title+'<span class="day-badge">Day '+t.day+'</span></div>'+
+        '<div class="touch-meta">'+t.platform+'</div>'+
+        '<div class="touch-script">'+t.script+'</div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+t.notes.map(function(n){return'<span class="pill p-gray" style="font-size:10px">'+n+'</span>';}).join('')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// CALL SCRIPTS
+// ═══════════════════════════════════════
+function renderScripts(){
+  var discovery=[
+    {phase:'Open — min 0–2',script:'"Thanks for taking the time. I want to understand how you currently work before I show you anything — that way I can make the demo relevant to your actual book. Is that okay?"'},
+    {phase:'Pain questions — min 2–10',script:'1. "Walk me through how you reconcile commission from your biggest insurer. How does it work today?"\n2. "How often do you find a discrepancy between what they paid and what you expected?"\n3. "What happens when you do find one — do you dispute it? What\'s the process?"\n4. "Are there discrepancies you suspect exist but don\'t have time to track down?"\n5. "Who does this work — you, or does someone on your team handle it?"'},
+    {phase:'Quantify — min 10–13',script:'"Based on what you\'ve told me — roughly how many active policies do you have with [insurer]? And what\'s the average monthly commission on that book?"'},
+    {phase:'Close to demo — min 13–15',script:'"Here\'s what I want to do — I\'ll pull up the pack and show you the exception report using dummy data that mirrors your structure. You\'ll see exactly what it surfaces. Can we do 30 minutes on [Day] or [Day]?"\n\nIf they push back on time: "Understood — I can do a 10-minute screen share. No slides, just the dashboard. You\'ll know in 10 minutes if it\'s relevant to you."'},
+  ];
+  var demo=[
+    {phase:'Frame the problem — min 1–5',script:'"On our call you mentioned you reconcile [insurer] manually. I want to show you what that looks like in the pack. Here\'s the commission waterfall."\n\n→ Show: Total expected commission vs total received. One bar chart. Gap visible immediately.'},
+    {phase:'The money shot — min 5–15',script:'"This is the exception report. Every line where what the insurer paid doesn\'t match what your policy register says they should have paid. In this dummy dataset, there are 8. In a real book your size, you\'d typically see 4–12."\n\n"Each of these is a dispute you could raise. This one — R3,200 — is a lapsed policy that the insurer still deducted an admin fee on. Without this report, you\'d never find it."'},
+    {phase:'Recovery tracker — min 15–22',script:'"This tab tracks disputes raised, their status, and what\'s been recovered. After 3 months of use, you\'ll have a full audit trail for every insurer."'},
+    {phase:'Customise to their book — min 22–27',script:'"Your setup would take 2 weeks. We map your commission statements to a standard schema — most insurers use Excel or CSV exports. Then we build your policy register view. After that, you run this reconciliation monthly."'},
+    {phase:'The close — min 27–30',script:'"Based on your book size — [X policies, insurer] — I\'d estimate you\'ll see 5–10 exceptions in your first run. Even recovering 3 of them at R2–3k each puts you ahead in month 1. Setup is R[X], then R[Y]/month. Want to get started?"\n\nIf they ask for time: "Totally fine. Let me send you the proposal today with the payment link. If you decide it\'s not for you, you can just ignore it. If you\'re in, you\'re in within 48 hours and we start immediately."\n\n→ Send proposal within 30 minutes of the call ending.'},
+  ];
+  var objections=[
+    {phase:'"We already do this in Excel"',script:'"Exactly — most brokers do. The question is how long it takes and how many exceptions you\'re missing. Excel finds what you look for; this finds what you\'re not looking for. Can I show you the difference in 10 minutes?"'},
+    {phase:'"We don\'t have time right now"',script:'"Understood — when\'s a better time? The reason I ask is that the commission recovery usually pays for the setup in the first month. I\'d hate for you to leave money on the table for another quarter."'},
+    {phase:'"It\'s too expensive"',script:'"What\'s your biggest insurer paying monthly? Even recovering one disputed policy a month typically covers the subscription. Want me to run the numbers for your book size?"'},
+    {phase:'"We\'re not ready / need to think about it"',script:'"Totally fair. Can I send you the one-pager today so you have something concrete to look at? No obligation — if it\'s not relevant you can ignore it. If it is, we can move fast."'},
+    {phase:'"Our data is messy / not standardised"',script:'"That\'s the norm — 80% of brokers I work with have the same issue. The first step is mapping your statement format to the standard schema. I handle that in the setup. All I need is one month\'s commission export from your biggest insurer."'},
+  ];
+  function blocks(data){
+    return data.map(function(b){return'<div class="card" style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+b.phase+'</div><div class="touch-script">'+b.script+'</div></div>';}).join('');
+  }
+  document.getElementById('script-discovery').innerHTML=blocks(discovery);
+  document.getElementById('script-demo').innerHTML=blocks(demo);
+  document.getElementById('script-objections').innerHTML=blocks(objections);
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal(title,html){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').innerHTML=html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e){if(e.target===document.getElementById('modal-overlay'))closeModalDirect();}
+function closeModalDirect(){document.getElementById('modal-overlay').classList.remove('open');}
+
+// ═══════════════════════════════════════
+// INNER TAB SWITCHING (generic)
+// ═══════════════════════════════════════
+function switchInner(prefix,id){
+  document.querySelectorAll('.inner-panel-'+prefix).forEach(function(p){p.style.display='none';});
+  var el=document.getElementById(prefix+'-'+id);
+  if(el){el.style.display='block';}
+  // highlight tab
+  var parent=el?el.closest('[id^="panel-"]'):null;
+  if(parent){
+    parent.querySelectorAll('.inner-tab').forEach(function(t,i){
+      t.classList.remove('active');
+      if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+id+"'"))t.classList.add('active');
+    });
+  }
+  if(prefix==='ord'&&id==='list')renderOrders();
+  if(prefix==='acc'&&id==='list')renderAccounts();
+  if(prefix==='del'&&id==='list')renderDeliveries();
+  if(prefix==='del'&&id==='add')populateAccountSelects();
+  if(prefix==='ord'&&id==='add')populateAccountSelects();
+}
+
+// ═══════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════
+function exportData(){
+  var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Vantix_backup_'+today()+'.json';a.click();
+}
+function triggerImport(){document.getElementById('import-file').click();}
+function importData(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(confirm('This will merge imported data with current data. Continue?')){
+        // merge by id
+        ['prospects','accounts','orders','deliveries','proposals','activity'].forEach(function(k){
+          if(d[k]&&Array.isArray(d[k])){
+            var existing=DB[k].map(function(x){return x.id;});
+            d[k].forEach(function(item){if(!existing.includes(item.id))DB[k].push(item);});
+          }
+        });
+        save();alert('Import successful');renderPage(CURRENT_NAV);
+      }
+    }catch(err){alert('Invalid JSON file');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+load();
+nav('dashboard');
+renderSequence();
+renderScripts();
+setInterval(function(){renderDashboard();},60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+Period,PolicyNumber,Provider,Adviser,Client,CommissionType,CommissionAmount,StatementId
+202601,POL12345,Insurer X,Jane Doe,ABC Trading,Ongoing,1250.00,STMT-001
+202601,POL99901,Insurer Y,John Smith,Moyo Family,Initial,5400.00,STMT-001
+202601,POL88802,Insurer X,Jane Doe,Zulu Logistics,Fee,350.00,STMT-001

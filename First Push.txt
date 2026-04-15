@@ -1,0 +1,10 @@
+# If you haven't set up the remote yet
+git remote add origin https://github.com/VantixSA/Vantix.git
+
+# If the remote already exists, check it
+git remote -v
+
+# Stage, commit, and push
+git add .
+git commit -m "First Commit"
+git push origin main

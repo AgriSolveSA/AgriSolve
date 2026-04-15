@@ -1,0 +1,2 @@
+Hi <Name> — quick one. I help brokerages **find missing commission + commission leakage** using a simple Power BI management pack (your data stays in your environment).
+If I could show you a 5‑minute demo that flags **missing ongoing commission** and statement mismatches, would you be open to a quick call this week?

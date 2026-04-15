@@ -1,0 +1,16 @@
+Subject: Quick way to detect missing commission (Power BI pack)
+
+Hi <Name>,
+
+I build a broker-focused Power BI management pack that turns commission statements into:
+- monthly commission trend (YTD included)
+- mismatches / duplicates / reversals list
+- missing ongoing commission signals
+- optional Expected vs Actual leakage (if premium/policy register exists)
+
+Everything runs in your environment; I just implement and support it.
+
+If you’re open, I can show a 5‑minute demo and we’ll confirm if your exports are sufficient.
+
+Regards,
+<Your Name>

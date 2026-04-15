@@ -1,0 +1,3 @@
+Customer,InvoiceDate,DueDate,Balance,AgeBucket
+ABC Trading,2026-01-05,2026-01-20,12500.00,0-30
+XYZ Services,2025-12-10,2026-01-10,8900.00,31-60
