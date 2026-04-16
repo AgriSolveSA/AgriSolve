@@ -1,7 +1,7 @@
 # Onboarding Email Sequence (Async-Friendly)
 
 ## Email 1 — Welcome + Next Steps
-Subject: Vantix Dashboard — Next steps + data checklist
+Subject: AgriSolve Dashboard — Next steps + data checklist
 
 Hi <Name>,
 
@@ -16,7 +16,7 @@ Once I have the files, I’ll validate format and confirm go‑live date.
 
 Regards,
 Adriaan
-(Vantix)
+(AgriSolve)
 
 ---
 

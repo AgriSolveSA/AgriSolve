@@ -1,11 +1,11 @@
-// Pseudocode: Vantix SME Dashboard Pricing - Complete Implementation
+// Pseudocode: AgriSolve SME Dashboard Pricing - Complete Implementation
 
 // === MAIN PRODUCT SYSTEM ===
-APP "Vantix_SME_Dashboard_Pricing" {
+APP "AgriSolve_SME_Dashboard_Pricing" {
     
     // === PRODUCT DEFINITION ===
     CLASS Product {
-        NAME = "Vantix SME Dashboard"
+        NAME = "AgriSolve SME Dashboard"
         VERSION = "1.0"
         CATEGORY = "Business Intelligence Dashboard"
         TARGET_MARKET = "South African SMEs"
@@ -52,8 +52,8 @@ APP "Vantix_SME_Dashboard_Pricing" {
         ]
         
         IP_RETENTION = {
-            "template": "Vantix retains ownership",
-            "measures_library": "Vantix retains ownership",
+            "template": "AgriSolve retains ownership",
+            "measures_library": "AgriSolve retains ownership",
             "customizations": "Client owns customizations"
         }
         

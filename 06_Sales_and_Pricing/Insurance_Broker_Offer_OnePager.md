@@ -1,4 +1,4 @@
-// Pseudocode: Broker Revenue & Commission Pack (Vantix)
+// Pseudocode: Broker Revenue & Commission Pack (AgriSolve)
 
 DEFINE BrokerPackPurpose:
     - Solve invisible commission leakage
@@ -14,7 +14,7 @@ DEFINE Deliverables:
 
 DEFINE DataPolicy:
     - All data remains in client environment
-    - Vantix operates with least-privilege access
+    - AgriSolve operates with least-privilege access
 
 DEFINE Packages:
     - Starter

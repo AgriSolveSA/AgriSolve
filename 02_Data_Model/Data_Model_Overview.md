@@ -1,7 +1,7 @@
-// Pseudocode: Core Tables (Vantix SME Dashboard) - Complete Implementation
+// Pseudocode: Core Tables (AgriSolve SME Dashboard) - Complete Implementation
 
 // === MAIN CORE TABLES SYSTEM ===
-APP "Vantix_Core_Tables" {
+APP "AgriSolve_Core_Tables" {
     
     // === TABLE DEFINITION STRUCTURE ===
     CLASS TableDefinition {

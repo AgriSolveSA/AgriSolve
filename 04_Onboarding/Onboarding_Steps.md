@@ -1,4 +1,4 @@
-// Pseudocode: Data Processing Workflow (Vantix SME Dashboard)
+// Pseudocode: Data Processing Workflow (AgriSolve SME Dashboard)
 
 DEFINE WorkflowSteps:
 

@@ -1,7 +1,7 @@
 // Pseudocode: Service Agreement Skeleton (Template)
 
 DEFINE Parties:
-    - Provider = "Vantix (Pty) Ltd"
+    - Provider = "AgriSolve (Pty) Ltd"
     - Client = "______________________"
 
 DEFINE Services:
@@ -31,12 +31,12 @@ DEFINE Fees:
 DEFINE DataAndSecurity:
     - Client retains ownership of all data
     - Hosting remains on client infrastructure
-    - Vantix access = least privilege + revocable
+    - AgriSolve access = least privilege + revocable
 
 DEFINE IPAndLicensing:
     ManagedTiers:
         - Client receives license to use deliverables
-        - Vantix retains template IP
+        - AgriSolve retains template IP
     OwnershipTier:
         - Deliverables provided
         - IP transfer only if explicitly stated

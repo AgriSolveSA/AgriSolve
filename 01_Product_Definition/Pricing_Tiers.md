@@ -1,7 +1,7 @@
 // Pseudocode: Pricing Tiers (Client Picks) - Complete Implementation
 
 // === MAIN PRICING SYSTEM ===
-APP "Vantix_Pricing_Tiers" {
+APP "AgriSolve_Pricing_Tiers" {
     
     // === PRICING TIER DEFINITIONS ===
     CLASS PricingTiers {

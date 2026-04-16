@@ -1,4 +1,4 @@
-// Pseudocode: Monitoring Routine (Vantix SME Dashboard)
+// Pseudocode: Monitoring Routine (AgriSolve SME Dashboard)
 
 DEFINE MonitoringSchedule:
 

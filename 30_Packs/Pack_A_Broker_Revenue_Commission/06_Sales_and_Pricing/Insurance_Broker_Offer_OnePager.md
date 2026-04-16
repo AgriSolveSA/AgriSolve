@@ -1,4 +1,4 @@
-# Vantix — Broker Revenue & Commission Pack (One Pager)
+# AgriSolve — Broker Revenue & Commission Pack (One Pager)
 
 ## Why brokers buy this
 Commission leakage is invisible until it’s too late.
@@ -13,7 +13,7 @@ A client-hosted Power BI dashboard that:
 - provides drilldown to statement line level (traceable)
 
 ## Data stays with you
-All data remains in your environment. Vantix works with least-privilege access.
+All data remains in your environment. AgriSolve works with least-privilege access.
 
 ## Packages
 Starter / Standard / Buy-Out (same tiers as the core kit).

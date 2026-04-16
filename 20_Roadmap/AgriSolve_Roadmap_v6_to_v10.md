@@ -1,4 +1,4 @@
-# Vantix Roadmap: v6 → v10
+# AgriSolve Roadmap: v6 → v10
 This roadmap converts the current toolkit into a durable, licensable operating system.
 Each version adds leverage without increasing support load.
 
@@ -69,12 +69,12 @@ Risk reduction:
 
 ---
 
-## v10 — Vantix Operating System™
+## v10 — AgriSolve Operating System™
 **Purpose:** This becomes IP, not just a service.
 
 Add:
 - Formal methodology document
-- Certification checklist (“Vantix‑compliant dashboard”)
+- Certification checklist (“AgriSolve‑compliant dashboard”)
 - Annual license option
 - Audit & upgrade path
 

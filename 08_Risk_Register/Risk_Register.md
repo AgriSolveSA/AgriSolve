@@ -1,4 +1,4 @@
-// Pseudocode: Risk Management (Vantix SME Dashboard)
+// Pseudocode: Risk Management (AgriSolve SME Dashboard)
 
 DEFINE Risks:
     Risk1: Burnout

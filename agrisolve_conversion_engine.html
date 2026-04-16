@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vantix — Ops Platform</title>
+<title>AgriSolve — Ops Platform</title>
 <style>
 :root{
   --bg:#ffffff;--bg2:#f5f4f0;--bg3:#eeecea;
@@ -205,7 +205,7 @@ textarea{resize:vertical;min-height:68px}
 
 <!-- SIDEBAR -->
 <div id="sidebar">
-  <div class="sidebar-logo">Vantix<span>Ops Platform</span></div>
+  <div class="sidebar-logo">AgriSolve<span>Ops Platform</span></div>
 
   <div class="nav-section">Overview</div>
   <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">◈</span>Dashboard</div>
@@ -561,12 +561,12 @@ var ORDER_STATUS_COLORS = {Quoted:'p-gray',Invoiced:'p-blue','Part-paid':'p-ambe
 var DELIVERY_STATUS_COLORS = {Pending:'p-gray','In progress':'p-amber',Done:'p-teal',Blocked:'p-red'};
 
 function save(){
-  try{localStorage.setItem('Vantix_ops',JSON.stringify(DB));}catch(e){}
+  try{localStorage.setItem('AgriSolve_ops',JSON.stringify(DB));}catch(e){}
   document.getElementById('save-indicator').textContent='Saved '+new Date().toLocaleTimeString();
 }
 function load(){
   try{
-    var d=localStorage.getItem('Vantix_ops');
+    var d=localStorage.getItem('AgriSolve_ops');
     if(d){var p=JSON.parse(d);Object.assign(DB,p);}
   }catch(e){}
 }
@@ -1200,7 +1200,7 @@ function switchInner(prefix,id){
 // ═══════════════════════════════════════
 function exportData(){
   var blob=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Vantix_backup_'+today()+'.json';a.click();
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='AgriSolve_backup_'+today()+'.json';a.click();
 }
 function triggerImport(){document.getElementById('import-file').click();}
 function importData(e){

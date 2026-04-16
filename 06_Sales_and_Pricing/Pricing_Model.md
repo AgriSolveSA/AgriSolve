@@ -1,4 +1,4 @@
-// Pseudocode: Pricing Model (Vantix SME Dashboard)
+// Pseudocode: Pricing Model (AgriSolve SME Dashboard)
 
 DEFINE PricingTerms:
 

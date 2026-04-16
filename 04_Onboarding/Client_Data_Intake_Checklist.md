@@ -1,4 +1,4 @@
-// Pseudocode: Required Data Inputs (Vantix SME Dashboard)
+// Pseudocode: Required Data Inputs (AgriSolve SME Dashboard)
 
 DEFINE RequiredDataSources:
 

@@ -1,4 +1,4 @@
-# Vantix v6.6 — 90-Day Execution Hub (Pack A)
+# AgriSolve v6.6 — 90-Day Execution Hub (Pack A)
 
 ## The only goal for the next 90 days
 Close **1 paying client** for **Pack A (Broker Revenue & Commission)** and deliver a repeatable monthly process.

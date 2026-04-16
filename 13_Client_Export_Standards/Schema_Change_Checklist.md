@@ -14,7 +14,7 @@ DEFINE ClientChecklist_BeforeExportChange:
     Step4: ConfirmBusinessMeaning
         - Explain meaning of any changed fields
 
-DEFINE VantixResponse:
+DEFINE AgriSolveResponse:
     Step1: ClassifyChange
         - IF SmallChangeInScope → Proceed
         - ELSE → OutOfScopeQuote

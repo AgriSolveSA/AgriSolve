@@ -9,7 +9,7 @@ DEFINE CoreConstraints:
     - CommunicationMode = Asynchronous (written first, calls only if unavoidable)
     - TemplateDriven = TRUE (same model/pages for all clients in vertical)
     - ClientHosted = TRUE (data stays in client tenant/storage)
-    - IPProtected = TRUE (templates remain Vantix IP unless Buy-Out)
+    - IPProtected = TRUE (templates remain AgriSolve IP unless Buy-Out)
 
 STATE 0: ReadyToSell
     Gate = "No improvisation"

@@ -1,4 +1,4 @@
-# Vantix SME Dashboard Starter Kit — v6.6 (90-Day Execution Baseline)
+# AgriSolve SME Dashboard Starter Kit — v6.6 (90-Day Execution Baseline)
 
 This version is intentionally trimmed to maximize 90-day success.
 **Scope: Pack A (Broker Revenue & Commission) only.**

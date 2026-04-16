@@ -1,7 +1,7 @@
 // IP and Licensing System - App Creation Pseudocode
 
 // === MAIN APP STRUCTURE ===
-APP "Vantix IP Licensing System" {
+APP "AgriSolve IP Licensing System" {
     // === LICENSE TIER SELECTION ===
     FUNCTION selectLicenseTier(tierType) {
         SWITCH(tierType) {
@@ -13,7 +13,7 @@ APP "Vantix IP Licensing System" {
 
     // === IP OWNERSHIP MANAGEMENT ===
     CLASS IPOwnership {
-        // Core IP Components (Vantix Retains)
+        // Core IP Components (AgriSolve Retains)
         STATIC_COMPONENTS = [
             "template_model",
             "dax_measures_library",
@@ -38,7 +38,7 @@ APP "Vantix IP Licensing System" {
         RETURN {
             license_type: "License to Use",
             usage_rights: "Internal business purposes",
-            ip_owner: "Vantix",
+            ip_owner: "AgriSolve",
             client_owns: ["client_data", "tenant_environment"],
             restrictions: [
                 "No redistribution of templates",
@@ -113,10 +113,10 @@ APP "Vantix IP Licensing System" {
             }
         } ELSE {
             RETURN {
-                deployment_method: "Vantix Hosted",
+                deployment_method: "AgriSolve Hosted",
                 ip_compatibility: "YES",
                 support_model: "Full Support",
-                data_responsibility: "Vantix"
+                data_responsibility: "AgriSolve"
             }
         }
     }
@@ -141,7 +141,7 @@ APP "Vantix IP Licensing System" {
             license_terms: license.license_type,
             ip_rights: getIPRights(license),
             access_control: getAccessControl(license),
-            support_contact: "Vantix Support Team"
+            support_contact: "AgriSolve Support Team"
         }
         RETURN DOCUMENTATION
     }

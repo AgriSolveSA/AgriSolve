@@ -16,7 +16,7 @@ DEFINE FileNamingConventions:
         - Products.xlsx
 
 DEFINE Rules:
-    Rule1: ColumnHeaders must not change without notifying Vantix
+    Rule1: ColumnHeaders must not change without notifying AgriSolve
         - Use SchemaChangeChecklist if changes required
     Rule2: No blank rows above headers
     Rule3: Use ISO dates (YYYY-MM-DD) where possible

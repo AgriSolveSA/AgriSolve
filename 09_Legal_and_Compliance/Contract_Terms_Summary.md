@@ -1,4 +1,4 @@
-// Pseudocode: Contract Terms (Vantix SME Dashboard)
+// Pseudocode: Contract Terms (AgriSolve SME Dashboard)
 
 DEFINE SubscriptionModel:
     - Term = MonthToMonth

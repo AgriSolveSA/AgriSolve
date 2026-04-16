@@ -1,12 +1,12 @@
-# Vantix SME Dashboard Starter Kit
+# AgriSolve SME Dashboard Starter Kit
 
 Everything needed to build and operate a repeatable Power BI SME dashboard.
 
 ## What's new in v2 (Business Model + IP)
 This kit now includes:
 - 3-tier packaging (Starter Managed / Standard Managed / Ownership Buy-Out)
-- Client-hosted deployment patterns (no Vantix hosting required)
-- IP protection + licensing language (template IP stays with Vantix)
+- Client-hosted deployment patterns (no AgriSolve hosting required)
+- IP protection + licensing language (template IP stays with AgriSolve)
 - Pricing + break-even calculator templates
 - Change control + scope guardrails (prevents custom-work trap)
 

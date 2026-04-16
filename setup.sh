@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# Vantix DaaS — Homebrew Setup & Dependency Picker
+# AgriSolve DaaS — Homebrew Setup & Dependency Picker
 # Run: chmod +x setup.sh && ./setup.sh
 # ============================================================
 
@@ -232,7 +232,7 @@ case "$PICK_RESULT" in
 esac
 
 pick "Python data stack (installed into your project venv):" 0 \
-  "pandas + openpyxl + duckdb-engine   (standard Vantix validation stack)" \
+  "pandas + openpyxl + duckdb-engine   (standard AgriSolve validation stack)" \
   "polars + connectorx                  (10x faster than pandas, Rust-based)" \
   "Both                                 (polars for speed, pandas for compatibility)"
 
@@ -361,7 +361,7 @@ esac
 header "Step 8 — Project Python Environment"
 # ═══════════════════════════════════════════════════════════════
 
-PROJ_DIR="$HOME/Vantix"
+PROJ_DIR="$HOME/AgriSolve"
 step "Creating project at $PROJ_DIR..."
 mkdir -p "$PROJ_DIR"
 cd "$PROJ_DIR"
@@ -455,9 +455,9 @@ EOF
   # pyproject.toml
   cat > pyproject.toml << 'EOF'
 [project]
-name = "Vantix"
+name = "AgriSolve"
 version = "0.1.0"
-description = "Vantix DaaS — Power BI dashboard product for SME brokers"
+description = "AgriSolve DaaS — Power BI dashboard product for SME brokers"
 requires-python = ">=3.11"
 
 [tool.ruff]
@@ -571,7 +571,7 @@ repos:
 EOF
 
   git add .
-  git commit -m "chore: initialise Vantix DaaS project structure"
+  git commit -m "chore: initialise AgriSolve DaaS project structure"
   ok "Git repo initialised with first commit"
 else
   ok "Git repo already initialised"
@@ -581,7 +581,7 @@ fi
 header "Step 10 — Remote + Pre-commit Hooks"
 # ═══════════════════════════════════════════════════════════════
 
-REMOTE_URL="https://github.com/VantixSA/Vantix.git"
+REMOTE_URL="https://github.com/AgriSolveSA/AgriSolve.git"
 
 if git remote get-url origin &>/dev/null 2>&1; then
   ok "Remote 'origin' already set: $(git remote get-url origin)"

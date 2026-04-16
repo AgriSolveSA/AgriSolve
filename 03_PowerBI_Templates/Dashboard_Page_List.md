@@ -1,4 +1,4 @@
-// Pseudocode: Dashboard Pages (Vantix SME Dashboard)
+// Pseudocode: Dashboard Pages (AgriSolve SME Dashboard)
 
 DEFINE DashboardPages:
 

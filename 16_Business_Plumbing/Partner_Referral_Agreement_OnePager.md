@@ -1,10 +1,10 @@
 # Partner Referral Agreement (One Pager)
 
 Partner: ______________________
-Vantix: Vantix (Pty) Ltd
+AgriSolve: AgriSolve (Pty) Ltd
 
 ## Referral
-Partner introduces Vantix to SME client(s).
+Partner introduces AgriSolve to SME client(s).
 
 ## Fees (choose one)
 - [ ] Referral fee: ____% of setup fee paid once per client
@@ -18,4 +18,4 @@ Month-to-month; either party can end with 30 days notice.
 
 Signed:
 Partner: ______________  Date: ________
-Vantix: ____________  Date: ________
+AgriSolve: ____________  Date: ________

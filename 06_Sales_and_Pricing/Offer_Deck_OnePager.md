@@ -1,4 +1,4 @@
-// Pseudocode: Client One-Pager (Vantix SME Dashboard)
+// Pseudocode: Client One-Pager (AgriSolve SME Dashboard)
 
 DEFINE ValueProposition:
     - Automated management dashboard

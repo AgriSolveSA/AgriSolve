@@ -23,7 +23,7 @@ DEFINE Components:
         - DirtyExport = Example with broken headers, blank rows, wrong formats
 
     Component4: SchemaChangeChecklist
-        - Notify Vantix before changing exports
+        - Notify AgriSolve before changing exports
         - Document header changes
         - Validate column types
         - Confirm folder + naming compliance

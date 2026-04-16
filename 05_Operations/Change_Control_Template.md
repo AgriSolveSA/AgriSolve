@@ -31,7 +31,7 @@ DEFINE ChangeControl:
 
     APPROVALS:
         - ClientSignature (Name + Date)
-        - CompanySignature (Vantix Name + Date)
+        - CompanySignature (AgriSolve Name + Date)
 
 DEFINE ScopeProtectionRules:
     - All changes must be classified before execution

@@ -1,4 +1,4 @@
-// Pseudocode: Support SLA (Vantix SME Dashboard)
+// Pseudocode: Support SLA (AgriSolve SME Dashboard)
 
 DEFINE SupportPolicy:
 

@@ -1,11 +1,11 @@
-// Pseudocode: Product Scope (Vantix SME Dashboard) - Complete Implementation
+// Pseudocode: Product Scope (AgriSolve SME Dashboard) - Complete Implementation
 
 // === MAIN PRODUCT SCOPE SYSTEM ===
-APP "Vantix_Product_Scope" {
+APP "AgriSolve_Product_Scope" {
     
     // === PRODUCT SCOPE DEFINITION ===
     CLASS ProductScope {
-        PRODUCT_NAME = "Vantix SME Dashboard"
+        PRODUCT_NAME = "AgriSolve SME Dashboard"
         
         // === INCLUDED FEATURES ===
         INCLUDED_FEATURES = {

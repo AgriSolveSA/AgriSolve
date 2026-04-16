@@ -17,6 +17,6 @@ DEFINE Rules:
     Rule1:
         - Partner must enforce standard exports
     Rule2:
-        - Vantix supports only the standard pack
+        - AgriSolve supports only the standard pack
     Rule3:
         - Escalations handled via Change Control process

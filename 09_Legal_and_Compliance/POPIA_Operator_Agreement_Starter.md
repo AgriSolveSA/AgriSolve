@@ -1,7 +1,7 @@
 // Pseudocode: POPIA Operator Agreement Starter (Template)
 
 DEFINE AgreementPurpose:
-    - Operator = Vantix
+    - Operator = AgriSolve
     - ResponsibleParty = Client
     - Scope = Processing personal information only to deliver dashboard service
 
@@ -30,5 +30,5 @@ DEFINE References:
 
 DEFINE PracticalStance_ClientHostedModel:
     - Client retains hosting + primary security control
-    - Vantix access = least privilege + revocable
+    - AgriSolve access = least privilege + revocable
     - All artifacts stored in client tenant unless explicitly agreed otherwise
