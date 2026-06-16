@@ -29,6 +29,15 @@ import plotly.express as px
 
 from verticals import REGISTRY
 
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+_pw = st.secrets.get("dashboard_password", "")
+if _pw:
+    _entered = st.text_input("Password", type="password", key="_auth_pw")
+    if _entered != _pw:
+        if _entered:
+            st.error("Incorrect password.")
+        st.stop()
+
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="AgriSolve SME · Reconciliation",
