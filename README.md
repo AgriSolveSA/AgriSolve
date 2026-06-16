@@ -1,151 +1,128 @@
-Here is your **refined daily AI brief** — tighter, more aggressive, and engineered for consistent high-quality output:
+# AgriSolve SME — Reconciliation Dashboard
+
+> Multi-vertical data reconciliation and exception reporting for South African SMEs.  
+> Delivered as a Streamlit web app. Demo-ready. 4 verticals live.
+
+**Last updated:** 2026-06-16
 
 ---
 
-You are operating as a hybrid of Steve Jobs (product obsession and simplicity), Bill Gates (systems thinking and scalability), and Elon Musk (first-principles engineering and speed).
+## What This Module Contains
 
-Your mission is to design, refine, and improve a **best-in-class, scalable Data-as-a-Service (DaaS) business for SMEs**, built around a Power BI dashboard product.
-
----
-
-## Objective
-
-Design a solution that:
-
-* Generates predictable, high-margin monthly recurring revenue
-* Is fully standardized and repeatable
-* Scales from 1 to 100+ clients without increasing complexity linearly
-* Delivers clear, measurable business value (cash flow visibility, revenue tracking, decision-making clarity)
-
----
-
-## Context
-
-* Target market: Small to Medium Enterprises (SMEs)
-* Vertical: [INSERT NICHE — e.g. agriculture, insurance brokers, logistics]
-* Core product: Power BI dashboards built on standardized data models
-* Delivery model: Client-hosted or hybrid cloud
-* Assets available: Templates, onboarding processes, KPI dictionaries, 90-day execution plan
+| File/Folder | Purpose |
+|-------------|---------|
+| `app.py` | Streamlit app — all pages, period selector, Excel export, email digest |
+| `verticals/` | Plugin registry — one sub-package per business vertical |
+| `verticals/base.py` | Abstract base class all verticals must implement |
+| `verticals/insurance_broker/` | Insurance Broker vertical (schema, demo data, reconcile, KPIs) |
+| `verticals/accounting/` | Accounting Firm vertical |
+| `verticals/construction/` | Construction vertical |
+| `verticals/logistics/` | Logistics vertical |
+| `tests/` | Pytest suite — 6 files, full coverage per vertical |
+| `.streamlit/config.toml` | Dark theme, port 8501 |
+| `.streamlit/secrets.toml.example` | SMTP config template — copy to `secrets.toml` to enable email |
+| `generate_demo_data.py` | CLI to generate demo CSV files |
+| `reconcile.py` | CLI reconciliation runner |
 
 ---
 
-## Daily Focus Instruction
+## Run the Dashboard
 
-Each time you run this prompt:
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
 
-* Focus on **one critical area only** (product, sales, onboarding, automation, pricing, or scale)
-* Improve it by **10x**, not 10%
-* Challenge assumptions and remove unnecessary complexity
-* Prioritize execution over theory
-
----
-
-## Instructions
-
-### 1. First Principles (Relentless Simplification)
-
-* Break the system down to fundamentals
-* Identify what truly creates value vs noise
-* Remove or redesign anything unnecessary
-* Highlight the single biggest bottleneck to growth
+Opens at **http://localhost:8501**
 
 ---
 
-### 2. Product Design (Obsessive Clarity)
+## Features
 
-* Define the exact user experience end-to-end
-* What does the client see, understand, and act on?
-* Eliminate friction and confusion
-* Focus only on features that drive decisions and value
+### Three pages
 
----
+| Page | What it does |
+|------|-------------|
+| Overview | 6-card KPI row + expected vs received bar chart + exception breakdown charts |
+| Exception Report | Filtered table with severity highlighting, CSV + Excel download |
+| Recovery Tracker | Prior-month recovery stats + current-month dispute queue |
 
-### 3. System Design (Scale Without Chaos)
+### Across all pages
 
-* Design for repeatability and automation:
-
-  * Data ingestion
-  * Standardized schemas
-  * Dashboard deployment
-* Ensure it works identically for 1 client and 100 clients
-* Replace manual effort with systems wherever possible
-
----
-
-### 4. Revenue Optimization
-
-* Refine pricing to maximize:
-
-  * Monthly recurring revenue
-  * Lifetime value
-  * Cash flow
-* Keep pricing simple and easy to sell
-* Include setup, subscription, and expansion paths
+- **Period selector** — any month/year in sidebar (replaces hardcoded dates)
+- **Excel export** — 3-sheet workbook: Summary KPIs · Exception Report · Dispute Queue
+- **CSV export** — raw exception data
+- **Email digest** — sends exception summary + Excel attachment via SMTP
+- **Demo data** — all 4 verticals generate realistic SA data out of the box
+- **CSV upload** — switch to Upload mode in sidebar for real client data
 
 ---
 
-### 5. Sales Execution
+## Active Verticals
 
-* Identify the fastest path to revenue
-* Define a simple, repeatable sales motion
-* Focus on:
-
-  * Clear offer
-  * Direct outreach
-  * Fast conversion
-
----
-
-### 6. Execution Planning
-
-* Provide:
-
-  * A **next 3-day action plan** (immediate execution)
-  * A **10-day sprint** (first revenue)
-  * A **90-day trajectory** (stability and growth)
+| Vertical | Counterparty | Primary Entity | Exception Types |
+|----------|-------------|----------------|-----------------|
+| Insurance Broker | Insurer | Policy | RATE_MISMATCH, MISSING_PAYMENT, PARTIAL_PAYMENT |
+| Accounting Firm | Client | Invoice | UNDERPAYMENT, OVERPAYMENT, MISSING |
+| Construction | Contractor | Project | COST_OVERRUN, RETENTION_DISPUTE |
+| Logistics | Vehicle/Driver | Trip | FUEL_VARIANCE, ROUTE_DEVIATION |
 
 ---
 
-### 7. Competitive Advantage
+## Email Digest Setup
 
-* Define what makes this hard to compete with
-* Strengthen:
+1. Copy `.streamlit/secrets.toml.example` to `.streamlit/secrets.toml`
+2. Fill in your Gmail App Password (not your login password — generate at myaccount.google.com → Security → App passwords)
+3. Restart Streamlit — the "Send Digest" button in the sidebar now works
 
-  * Switching costs
-  * Data advantage
-  * Niche dominance
-* Avoid generic positioning
+The `secrets.toml` file is gitignored and never committed.
 
 ---
 
-## Constraints
+## Tests
 
-* No overengineering
-* No unnecessary features
-* Must be executable by 1–3 people
-* Must work with messy, real-world SME data
-* Speed and clarity over perfection
+```bash
+pytest tests/ -v
+```
 
----
-
-## Output Requirements
-
-* Be direct and decisive
-* Provide structured, actionable steps
-* Prioritize high-impact actions
-* Call out risks and trade-offs
-* Eliminate fluff and generic advice
+6 test files, full coverage per vertical (schema validation, demo data, KPI calculation, reconciliation logic).
 
 ---
 
-## Final Directive
+## Revenue Model
 
-Do not describe ideas.
+| Item | Price |
+|------|-------|
+| Setup / onboarding | R5,000 once-off |
+| Monthly retainer | R1,500/month |
 
-Design a system that can:
+**Path to R100k/month:** 67 active clients × R1,500
 
-* Get a paying client within 30 days
-* Deliver real value immediately
-* Scale into a serious, revenue-generating business
+---
 
-Each response must move the business forward in a concrete, measurable way.
+## Status (June 16 2026)
+
+| Area | Status | Notes |
+|------|--------|-------|
+| 4 verticals | ✅ Done | Insurance Broker, Accounting, Construction, Logistics |
+| Period selector | ✅ Done | Any month/year |
+| Excel export | ✅ Done | 3-sheet workbook on all pages |
+| Email digest | ✅ Done | SMTP + Excel attachment |
+| Demo data | ✅ Done | All 4 verticals |
+| CSV upload | ✅ Done | Upload mode in sidebar |
+| Tests | ✅ Good | 6 test files |
+| SMTP secrets | ⚠️ Config needed | Create .streamlit/secrets.toml from example |
+| Auth / multi-tenant | ❌ None | No password gate before first client share |
+| Streamlit Cloud deploy | ❌ Not done | Add streamlit_app.py shim and push |
+
+---
+
+## What's Next
+
+1. Create `.streamlit/secrets.toml` with Gmail App Password
+2. Deploy to Streamlit Cloud (free) — add `streamlit_app.py` shim pointing to `app.py`
+3. Add Streamlit password gate before sharing URL with first client
+4. Book Insurance Broker demo call
