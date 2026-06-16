@@ -1,0 +1,3 @@
+policy_number,insurer_name,client_surname,client_initials,product_type,policy_status,agreed_commission_rate,monthly_premium,expected_monthly_commission
+POL-EXAMPLE-001,Insurer Name Here,Smith,J,Life Cover,Active,0.075,2500,187.50
+POL-EXAMPLE-002,Insurer Name Here,Jones,A,Short-Term,Active,0.10,1800,180.00

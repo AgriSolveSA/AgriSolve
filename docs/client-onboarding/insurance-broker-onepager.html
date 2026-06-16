@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SME Analytics — Insurance Broker Commission Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; }
+  .page { max-width: 860px; margin: 0 auto; padding: 40px 24px; }
+
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .logo-badge { background: #f59e0b; color: #0f172a; font-weight: 800; font-size: 20px; padding: 8px 16px; border-radius: 8px; letter-spacing: -0.5px; }
+  .logo-sub { color: #94a3b8; font-size: 13px; }
+
+  h1 { font-size: 32px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+  .tagline { font-size: 16px; color: #f59e0b; font-weight: 600; margin-bottom: 32px; }
+
+  .problem-box { background: #1e293b; border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px 24px; margin-bottom: 32px; }
+  .problem-box h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 12px; }
+  .problem-box ul { list-style: none; }
+  .problem-box li { padding: 6px 0; font-size: 15px; color: #cbd5e1; }
+  .problem-box li::before { content: "✗ "; color: #ef4444; font-weight: 700; }
+
+  .solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  .sol-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 20px; }
+  .sol-card .icon { font-size: 28px; margin-bottom: 10px; }
+  .sol-card h3 { font-size: 15px; font-weight: 700; color: #f59e0b; margin-bottom: 6px; }
+  .sol-card p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+  .kpi { background: #1e293b; border: 1px solid #f59e0b33; border-radius: 8px; padding: 16px; flex: 1; min-width: 120px; text-align: center; }
+  .kpi .num { font-size: 26px; font-weight: 800; color: #f59e0b; }
+  .kpi .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  .how-it-works { background: #1e293b; border-radius: 10px; padding: 24px; margin-bottom: 32px; }
+  .how-it-works h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 16px; }
+  .steps { display: flex; gap: 0; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step::after { content: "→"; position: absolute; right: -8px; top: 14px; color: #334155; font-size: 20px; }
+  .step:last-child::after { display: none; }
+  .step .num { background: #f59e0b; color: #0f172a; font-weight: 800; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 14px; }
+  .step p { font-size: 12px; color: #94a3b8; line-height: 1.4; padding: 0 4px; }
+
+  .pricing-box { background: #0f172a; border: 2px solid #f59e0b; border-radius: 12px; padding: 28px; margin-bottom: 32px; text-align: center; }
+  .pricing-box h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 16px; }
+  .price-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .price-item .amount { font-size: 36px; font-weight: 800; color: #f59e0b; }
+  .price-item .desc { font-size: 13px; color: #64748b; margin-top: 4px; }
+  .price-divider { color: #334155; font-size: 28px; align-self: center; }
+
+  .data-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+  .data-table th { background: #1e293b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; padding: 10px 12px; text-align: left; }
+  .data-table td { padding: 10px 12px; font-size: 13px; color: #cbd5e1; border-bottom: 1px solid #1e293b; }
+  .data-table tr:hover td { background: #1e293b44; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-g { background: #14532d; color: #4ade80; }
+  .badge-y { background: #78350f; color: #fbbf24; }
+
+  .cta-box { background: #f59e0b; border-radius: 12px; padding: 28px; text-align: center; }
+  .cta-box h2 { color: #0f172a; font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .cta-box p { color: #78350f; font-size: 14px; margin-bottom: 16px; }
+  .cta-btn { background: #0f172a; color: #f59e0b; font-weight: 700; padding: 12px 28px; border-radius: 8px; font-size: 15px; text-decoration: none; display: inline-block; }
+
+  @media (max-width: 600px) {
+    .solution-grid { grid-template-columns: 1fr; }
+    .steps { flex-direction: column; gap: 12px; }
+    .step::after { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="logo-row">
+    <div class="logo-badge">AgriSolve</div>
+    <div>
+      <div style="font-weight:700;font-size:14px">SME Analytics</div>
+      <div class="logo-sub">Power BI + Python · Data-as-a-Service</div>
+    </div>
+  </div>
+
+  <h1>Stop Losing Commission.<br>Start Catching Every Rand.</h1>
+  <div class="tagline">Automated Commission Reconciliation for Insurance Brokers</div>
+
+  <div class="problem-box">
+    <h2>The Problem You Face Every Month</h2>
+    <ul>
+      <li>Insurers pay the wrong commission rate — you only discover it manually</li>
+      <li>Policy register vs insurer statements reconciled in Excel — 2–4 days of work</li>
+      <li>Exceptions buried in 500-row spreadsheets — high-risk items missed</li>
+      <li>No visibility on recovery status from prior months</li>
+      <li>No dashboard to show your principal broker how the book is performing</li>
+    </ul>
+  </div>
+
+  <div class="solution-grid">
+    <div class="sol-card">
+      <div class="icon">🔄</div>
+      <h3>Automated Reconciliation</h3>
+      <p>Upload your policy register and insurer commission statements. The engine reconciles every policy in under 60 seconds.</p>
+    </div>
+    <div class="sol-card">
+      <div class="icon">⚡</div>
+      <h3>Exception Detection</h3>
+      <p>Rate mismatches, missing policies, premium discrepancies — flagged by severity (High / Medium / Low) so you act on what matters.</p>
+    </div>
+    <div class="sol-card">
+      <div class="icon">📊</div>
+      <h3>KPI Dashboard</h3>
+      <p>Expected vs Received. Net variance. Total at risk. On-screen metrics your principal broker can see at any board meeting.</p>
+    </div>
+    <div class="sol-card">
+      <div class="icon">📈</div>
+      <h3>Recovery Tracker</h3>
+      <p>Prior month disputed amounts, recovery rate, and outstanding balances — one screen, updated monthly.</p>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="num">&lt;60s</div><div class="label">Reconciliation time</div></div>
+    <div class="kpi"><div class="num">240+</div><div class="label">Policies handled</div></div>
+    <div class="kpi"><div class="num">3</div><div class="label">Insurers simultaneously</div></div>
+    <div class="kpi"><div class="num">100%</div><div class="label">Your data, on-premise</div></div>
+  </div>
+
+  <div class="how-it-works">
+    <h2>How It Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <p>Export policy register from your system as CSV</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <p>Export commission statements from each insurer portal</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <p>Upload to your dashboard — reconciliation runs automatically</p>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <p>Review exceptions, export report, recover what you're owed</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#94a3b8;margin-bottom:12px">Sample Exception Report</h2>
+  <table class="data-table">
+    <thead>
+      <tr><th>Policy #</th><th>Insurer</th><th>Client</th><th>Exception</th><th>Severity</th><th>Variance</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>POL-1102</td><td>Pinnacle Life</td><td>Botha, A</td><td>Rate mismatch</td><td><span class="badge badge-y">High</span></td><td style="color:#ef4444">−R 1,250</td></tr>
+      <tr><td>POL-2045</td><td>Meridian ST</td><td>Swanepoel, P</td><td>Missing from statement</td><td><span class="badge badge-y">High</span></td><td style="color:#ef4444">−R 3,100</td></tr>
+      <tr><td>POL-3019</td><td>Apex Financial</td><td>Nkosi, T</td><td>Premium mismatch</td><td><span class="badge badge-g">Medium</span></td><td style="color:#fbbf24">−R 420</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pricing-box">
+    <h2>Simple Pricing — No Surprises</h2>
+    <div class="price-row">
+      <div class="price-item">
+        <div class="amount">R 5,000</div>
+        <div class="desc">Once-off setup<br>Data mapping · Configuration · Training</div>
+      </div>
+      <div class="price-divider">+</div>
+      <div class="price-item">
+        <div class="amount">R 1,500</div>
+        <div class="desc">Per month<br>Support · Updates · Reconciliation engine</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:#64748b">Your data runs on your machine. No cloud subscription. No per-user fees. Cancel anytime.</div>
+  </div>
+
+  <div class="cta-box">
+    <h2>Ready to see it with your own data?</h2>
+    <p>Book a 30-minute live demo. We'll run your actual policy register through the engine so you can see exactly what you've been missing.</p>
+    <a class="cta-btn" href="mailto:adriaan.h.pienaar@gmail.com?subject=Insurance%20Broker%20Dashboard%20Demo">Book a Demo →</a>
+  </div>
+
+  <div style="margin-top:24px;font-size:11px;color:#334155;text-align:center">
+    AgriSolve (Pty) Ltd · adriaan.h.pienaar@gmail.com · 074 666 8673 · South Africa
+  </div>
+
+</div>
+</body>
+</html>
