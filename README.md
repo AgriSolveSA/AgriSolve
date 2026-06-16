@@ -115,14 +115,13 @@ pytest tests/ -v
 | CSV upload | ✅ Done | Upload mode in sidebar |
 | Tests | ✅ Good | 6 test files |
 | SMTP secrets | ⚠️ Config needed | Create .streamlit/secrets.toml from example |
-| Auth / multi-tenant | ❌ None | No password gate before first client share |
-| Streamlit Cloud deploy | ❌ Not done | Add streamlit_app.py shim and push |
+| Auth | ✅ Done | Single shared password gate via `st.secrets["dashboard_password"]` in `app.py` — not full multi-tenant access control |
+| Streamlit Cloud deploy | ✅ Shim added | `streamlit_app.py` exists pointing to `app.py` — actual Streamlit Cloud deployment/push still to be done by the owner |
 
 ---
 
 ## What's Next
 
-1. Create `.streamlit/secrets.toml` with Gmail App Password
-2. Deploy to Streamlit Cloud (free) — add `streamlit_app.py` shim pointing to `app.py`
-3. Add Streamlit password gate before sharing URL with first client
-4. Book Insurance Broker demo call
+1. Create `.streamlit/secrets.toml` with Gmail App Password and a `dashboard_password`
+2. Push to Streamlit Cloud and confirm the `streamlit_app.py` entry point deploys cleanly
+3. Book Insurance Broker demo call
