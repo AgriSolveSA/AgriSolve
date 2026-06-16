@@ -228,7 +228,11 @@ with st.sidebar:
         st.markdown(f"**{labels['primary_label']}**")
         reg_file = st.file_uploader(labels["primary_caption"], type="csv", key="reg")
         if reg_file:
-            primary_df = pd.read_csv(reg_file)
+            try:
+                primary_df = pd.read_csv(reg_file)
+            except Exception as e:
+                st.error(f"Could not read '{reg_file.name}': {e}")
+                primary_df = None
 
         st.markdown(f"**{labels['secondary_label']}**")
         stmt_files = st.file_uploader(
@@ -237,7 +241,11 @@ with st.sidebar:
         )
         key_col = labels["secondary_key_column"]
         for f in stmt_files:
-            df = pd.read_csv(f)
+            try:
+                df = pd.read_csv(f)
+            except Exception as e:
+                st.error(f"Could not read '{f.name}': {e}")
+                continue
             if key_col in df.columns and not df.empty:
                 secondaries[df[key_col].iloc[0]] = df
 
