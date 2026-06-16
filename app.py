@@ -3,9 +3,24 @@ AgriSolve SME — Multi-Vertical Reconciliation Dashboard
 =========================================================
 Run:  python -m streamlit run app.py
 
-Select a business vertical from the sidebar. First launch defaults to
-Demo data. Upload real CSVs when ready.
+Features:
+- Multi-vertical: Insurance Broker, Accounting, Construction, Logistics
+- Demo data or CSV upload per vertical
+- Period selector (any month/year)
+- Exception report with severity filtering
+- Recovery tracker with dispute queue
+- Excel export (Summary + Exceptions + Recovery sheets)
+- Email digest via SMTP (configured in .streamlit/secrets.toml)
 """
+
+import io
+import smtplib
+import calendar
+from datetime import date
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
 import streamlit as st
 import pandas as pd
@@ -25,7 +40,6 @@ st.set_page_config(
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* KPI cards */
 [data-testid="metric-container"] {
     background: #1e1e2e;
     border: 1px solid #2d2d3f;
@@ -43,11 +57,7 @@ st.markdown("""
     font-weight: 700;
     color: #f7fafc;
 }
-
-/* Sidebar header */
 section[data-testid="stSidebar"] h2 { color: #7c3aed; }
-
-/* Exception type badges rendered as text */
 .badge-high    { color: #fc8181; font-weight: 600; }
 .badge-medium  { color: #f6ad55; font-weight: 600; }
 .badge-low     { color: #68d391; font-weight: 600; }
@@ -55,13 +65,144 @@ section[data-testid="stSidebar"] h2 { color: #7c3aed; }
 """, unsafe_allow_html=True)
 
 
-# ── Sidebar — vertical selector + data source ─────────────────────────────────
+# ── Excel export helper ───────────────────────────────────────────────────────
+
+def build_excel(vertical, period_label, primary_df, secondaries, exceptions_df, stats, entity_summary):
+    """Build a multi-sheet Excel workbook and return bytes."""
+    buf = io.BytesIO()
+    with pd.ExcelWriter(buf, engine="openpyxl") as writer:
+
+        # Sheet 1 — Summary
+        summary_rows = [
+            ["AgriSolve SME — Reconciliation Report"],
+            [f"Vertical: {vertical.name}"],
+            [f"Period: {period_label}"],
+            [],
+            ["KPI", "Value"],
+            [stats["kpi1_label"], stats["kpi1_value"]],
+            [stats["kpi2_label"], stats["kpi2_value"]],
+            [stats["kpi3_label"], stats["kpi3_value"]],
+            [stats["kpi4_label"], stats["kpi4_value"]],
+            [stats["kpi5_label"], stats["kpi5_value"]],
+            [stats["kpi6_label"], stats["kpi6_value"]],
+            [],
+            [f"Expected vs Received by {vertical.counterparty_label}"],
+        ]
+        df_summary = pd.DataFrame(summary_rows)
+        df_summary.to_excel(writer, sheet_name="Summary", index=False, header=False)
+
+        # Append entity summary below
+        df_entity = pd.DataFrame(entity_summary)
+        df_entity.to_excel(writer, sheet_name="Summary", index=False, startrow=len(summary_rows) + 1)
+
+        # Sheet 2 — Exception Report
+        if not exceptions_df.empty:
+            exceptions_df.to_excel(writer, sheet_name="Exception Report", index=False)
+        else:
+            pd.DataFrame([["No exceptions found"]]).to_excel(
+                writer, sheet_name="Exception Report", index=False, header=False
+            )
+
+        # Sheet 3 — Dispute Queue
+        if not exceptions_df.empty:
+            queue = exceptions_df[["counterparty", "entity_id", "description",
+                                   "exception_type", "variance", "severity"]].copy()
+            queue["dispute_status"] = "To Dispute"
+            queue["variance_abs"]   = queue["variance"].abs().round(2)
+            queue.to_excel(writer, sheet_name="Dispute Queue", index=False)
+
+        # Sheet 4 — Primary data
+        primary_df.to_excel(writer, sheet_name="Source Data", index=False)
+
+    buf.seek(0)
+    return buf.read()
+
+
+# ── Email digest helper ───────────────────────────────────────────────────────
+
+def send_email_digest(to_email: str, vertical_name: str, period_label: str,
+                      stats: dict, exceptions_df: pd.DataFrame, excel_bytes: bytes) -> str:
+    """Send exception summary email with Excel attached. Returns '' on success, error string on failure."""
+    try:
+        secrets = st.secrets.get("smtp", {})
+        host    = secrets.get("host", "smtp.gmail.com")
+        port    = int(secrets.get("port", 587))
+        user    = secrets.get("user", "")
+        pwd     = secrets.get("password", "")
+        from_   = secrets.get("from", user)
+
+        if not user or not pwd:
+            return "SMTP credentials not configured. Add [smtp] section to .streamlit/secrets.toml"
+
+        n_exc = len(exceptions_df)
+        at_risk = exceptions_df["variance"].abs().sum() if not exceptions_df.empty else 0
+
+        html = f"""
+<html><body style="font-family:Arial,sans-serif;color:#222;max-width:600px">
+<h2 style="color:#7c3aed">AgriSolve SME — {vertical_name} Digest</h2>
+<p><strong>Period:</strong> {period_label}</p>
+<hr>
+<h3>KPI Summary</h3>
+<table style="border-collapse:collapse;width:100%">
+  <tr style="background:#f3f4f6"><th style="padding:8px;text-align:left">KPI</th><th style="padding:8px;text-align:right">Value</th></tr>
+  <tr><td style="padding:8px">{stats['kpi1_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi1_value']}</strong></td></tr>
+  <tr style="background:#f3f4f6"><td style="padding:8px">{stats['kpi2_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi2_value']}</strong></td></tr>
+  <tr><td style="padding:8px">{stats['kpi3_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi3_value']}</strong></td></tr>
+  <tr style="background:#f3f4f6"><td style="padding:8px">{stats['kpi4_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi4_value']}</strong></td></tr>
+  <tr><td style="padding:8px">{stats['kpi5_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi5_value']}</strong></td></tr>
+  <tr style="background:#f3f4f6"><td style="padding:8px">{stats['kpi6_label']}</td><td style="padding:8px;text-align:right"><strong>{stats['kpi6_value']}</strong></td></tr>
+</table>
+<h3 style="color:{'#e53e3e' if n_exc > 0 else '#38a169'}">
+  {n_exc} Exception(s) Found — R {at_risk:,.2f} at risk
+</h3>
+{'<p>See attached Excel workbook for full exception list and dispute queue.</p>' if n_exc > 0 else '<p>✅ All records reconcile within tolerance.</p>'}
+<hr>
+<p style="font-size:12px;color:#666">AgriSolve (Pty) Ltd · SME Analytics Platform · R5,000 setup + R1,500/month</p>
+</body></html>"""
+
+        msg = MIMEMultipart("mixed")
+        msg["From"]    = from_
+        msg["To"]      = to_email
+        msg["Subject"] = f"[AgriSolve SME] {vertical_name} — {period_label} Reconciliation Digest"
+        msg.attach(MIMEText(html, "html"))
+
+        # Attach Excel
+        att = MIMEBase("application", "vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        att.set_payload(excel_bytes)
+        encoders.encode_base64(att)
+        att.add_header("Content-Disposition", f'attachment; filename="AgriSolve_{vertical_name}_{period_label}.xlsx"')
+        msg.attach(att)
+
+        with smtplib.SMTP(host, port) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(user, pwd)
+            server.sendmail(from_, to_email, msg.as_string())
+
+        return ""
+    except Exception as e:
+        return str(e)
+
+
+# ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## AgriSolve SME")
     st.markdown("---")
 
     vertical_name = st.selectbox("Business vertical", list(REGISTRY.keys()))
     vertical = REGISTRY[vertical_name]()
+
+    st.markdown("---")
+
+    # Period selector
+    st.markdown("**Reporting Period**")
+    today = date.today()
+    col_m, col_y = st.columns(2)
+    month_names = list(calendar.month_abbr)[1:]
+    sel_month = col_m.selectbox("Month", month_names, index=today.month - 2 if today.month > 1 else 0)
+    sel_year  = col_y.selectbox("Year", list(range(2024, today.year + 1)), index=today.year - 2024)
+    period_month = month_names.index(sel_month) + 1
+    period_label = f"{sel_month} {sel_year}"
 
     st.markdown("---")
     mode = st.radio("Data source", ["Demo data", "Upload CSVs"], index=0)
@@ -92,12 +233,19 @@ with st.sidebar:
                 secondaries[df[key_col].iloc[0]] = df
 
     st.markdown("---")
-    st.caption(f"AgriSolve SME · {vertical.name} v1.0")
+
+    # Email digest
+    st.markdown("**📧 Email Digest**")
+    digest_email = st.text_input("Send report to:", placeholder="client@example.com")
+    send_digest  = st.button("Send Digest", use_container_width=True)
+
+    st.markdown("---")
+    st.caption(f"AgriSolve SME · {vertical.name} v1.1")
 
 
 # ── Guard: require data ───────────────────────────────────────────────────────
 if primary_df is None or not secondaries:
-    st.info("Upload a data file and at least one secondary file to begin.")
+    st.info("Select a vertical and data source to begin.")
     st.stop()
 
 
@@ -115,6 +263,44 @@ stats          = vertical.get_summary_stats(primary_df, secondaries, exceptions_
 entity_summary = vertical.get_entity_summary(primary_df, secondaries)
 
 
+# ── Excel export (build once, used in header + digest) ───────────────────────
+excel_bytes = build_excel(vertical, period_label, primary_df, secondaries,
+                          exceptions_df, stats, entity_summary)
+
+
+# ── Email digest trigger ──────────────────────────────────────────────────────
+if send_digest:
+    if not digest_email or "@" not in digest_email:
+        st.sidebar.error("Enter a valid email address.")
+    else:
+        with st.spinner("Sending digest..."):
+            err = send_email_digest(digest_email, vertical.name, period_label,
+                                    stats, exceptions_df, excel_bytes)
+        if err:
+            st.sidebar.error(f"Send failed: {err}")
+        else:
+            st.sidebar.success(f"✅ Digest sent to {digest_email}")
+
+
+# ── Page header with period + exports ────────────────────────────────────────
+hc1, hc2, hc3 = st.columns([4, 1, 1])
+hc1.markdown(f"### {vertical.name} · {period_label}")
+hc2.download_button(
+    "⬇️ CSV",
+    data=exceptions_df.to_csv(index=False).encode("utf-8") if not exceptions_df.empty else b"No exceptions",
+    file_name=f"exceptions_{vertical_name.replace(' ', '_')}_{period_label.replace(' ', '_')}.csv",
+    mime="text/csv",
+    use_container_width=True,
+)
+hc3.download_button(
+    "📊 Excel",
+    data=excel_bytes,
+    file_name=f"AgriSolve_{vertical_name.replace(' ', '_')}_{period_label.replace(' ', '_')}.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    use_container_width=True,
+)
+
+
 # ── Navigation ────────────────────────────────────────────────────────────────
 page = st.radio(
     "View",
@@ -129,9 +315,8 @@ st.markdown("---")
 # PAGE 1: OVERVIEW
 # ══════════════════════════════════════════════════════════════════════════════
 if page == "Overview":
-    st.subheader(f"March 2026 — {vertical.name} Summary")
+    st.subheader(f"{period_label} — {vertical.name} Summary")
 
-    # KPI cards
     c1, c2, c3, c4, c5, c6 = st.columns(6)
     c1.metric(stats["kpi1_label"], stats["kpi1_value"])
     c2.metric(stats["kpi2_label"], stats["kpi2_value"])
@@ -147,7 +332,6 @@ if page == "Overview":
 
     st.markdown("&nbsp;")
 
-    # Grouped bar — expected vs received per counterparty
     fig = go.Figure(data=[
         go.Bar(
             name="Expected",
@@ -180,7 +364,6 @@ if page == "Overview":
     fig.update_xaxes(gridcolor="#2d2d3f")
     st.plotly_chart(fig, use_container_width=True)
 
-    # Exception breakdown charts
     if not exceptions_df.empty:
         col_a, col_b = st.columns(2)
 
@@ -233,7 +416,6 @@ elif page == "Exception Report":
         st.success("No exceptions found. All records reconcile within tolerance.")
         st.stop()
 
-    # Filters
     fc1, fc2, fc3 = st.columns(3)
     cp_options   = ["All"] + sorted(exceptions_df["counterparty"].unique().tolist())
     type_options = ["All"] + sorted(exceptions_df["exception_type"].unique().tolist())
@@ -254,7 +436,6 @@ elif page == "Exception Report":
         f"Total at risk: **R {total_at_risk:,.2f}**"
     )
 
-    # Standard columns always present; optional extras shown if available
     standard_cols = ["counterparty", "entity_id", "description",
                      "exception_type", "severity", "variance"]
     extra_cols = [c for c in ["product_type", "policy_status", "expected", "actual"]
@@ -279,10 +460,8 @@ elif page == "Exception Report":
         return colours.get(val, "")
 
     fmt: dict[str, str] = {"Variance (R)": "R {:,.2f}"}
-    if "expected" in extra_cols:
-        fmt["Expected (R)"] = "R {:,.2f}"
-    if "actual" in extra_cols:
-        fmt["Received (R)"] = "R {:,.2f}"
+    if "expected" in extra_cols: fmt["Expected (R)"] = "R {:,.2f}"
+    if "actual"   in extra_cols: fmt["Received (R)"] = "R {:,.2f}"
 
     styled = (
         filtered[display_cols]
@@ -293,12 +472,18 @@ elif page == "Exception Report":
     )
     st.dataframe(styled, use_container_width=True, height=500)
 
-    csv = filtered.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        "Download exceptions CSV",
-        data=csv,
-        file_name="exceptions_2026_03.csv",
+    dc1, dc2 = st.columns(2)
+    dc1.download_button(
+        "⬇️ Download exceptions CSV",
+        data=filtered.to_csv(index=False).encode("utf-8"),
+        file_name=f"exceptions_{period_label.replace(' ', '_')}.csv",
         mime="text/csv",
+    )
+    dc2.download_button(
+        "📊 Download Excel workbook",
+        data=excel_bytes,
+        file_name=f"AgriSolve_{vertical_name.replace(' ', '_')}_{period_label.replace(' ', '_')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 
 
@@ -354,12 +539,18 @@ elif page == "Recovery Tracker":
             height=420,
         )
 
-        csv_q = queue_display.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            "Export dispute queue",
-            data=csv_q,
-            file_name="dispute_queue_2026_03.csv",
+        rc1, rc2 = st.columns(2)
+        rc1.download_button(
+            "Export dispute queue CSV",
+            data=queue_display.to_csv(index=False).encode("utf-8"),
+            file_name=f"dispute_queue_{period_label.replace(' ', '_')}.csv",
             mime="text/csv",
+        )
+        rc2.download_button(
+            "📊 Full Excel workbook",
+            data=excel_bytes,
+            file_name=f"AgriSolve_{vertical_name.replace(' ', '_')}_{period_label.replace(' ', '_')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
 
         st.info(
