@@ -28,23 +28,34 @@ import plotly.graph_objects as go
 import plotly.express as px
 
 from verticals import REGISTRY
+from auth import authenticate, allowed_verticals
 
-# ── Auth gate ─────────────────────────────────────────────────────────────────
-_pw = st.secrets.get("dashboard_password", "")
-if _pw:
-    _entered = st.text_input("Password", type="password", key="_auth_pw")
-    if _entered != _pw:
-        if _entered:
-            st.error("Incorrect password.")
-        st.stop()
-
-# ── Page config ───────────────────────────────────────────────────────────────
+# ── Page config (must be the very first Streamlit command — st.text_input
+#    in the old auth gate ran before this, which raises StreamlitAPIException
+#    the moment a real password is configured; hidden until now because no
+#    deployment has ever had dashboard_password set in this dev/demo env) ──
 st.set_page_config(
     page_title="AgriSolve SME · Reconciliation",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ── Auth gate ─────────────────────────────────────────────────────────────────
+# Per-client passwords (st.secrets["clients"]) restrict each client to their
+# own vertical(s); the legacy single dashboard_password still works for
+# anyone not yet migrated, with no restriction (sees every vertical).
+_legacy_pw   = st.secrets.get("dashboard_password", "")
+_clients_cfg = st.secrets.get("clients", {})
+
+_client = None
+if _legacy_pw or _clients_cfg:
+    _entered = st.text_input("Password", type="password", key="_auth_pw")
+    _ok, _client = authenticate(_entered, _legacy_pw, _clients_cfg)
+    if not _ok:
+        if _entered:
+            st.error("Incorrect password.")
+        st.stop()
 
 # ── Styling ───────────────────────────────────────────────────────────────────
 st.markdown("""
@@ -198,7 +209,13 @@ with st.sidebar:
     st.markdown("## AgriSolve SME")
     st.markdown("---")
 
-    vertical_name = st.selectbox("Business vertical", list(REGISTRY.keys()))
+    if _client:
+        st.caption(f"Signed in as **{_client.get('display_name', _client['client_id'])}**")
+    _visible_verticals = allowed_verticals(_client, list(REGISTRY.keys()))
+    if not _visible_verticals:
+        st.error("Your account isn't configured for any vertical. Contact AgriSolve support.")
+        st.stop()
+    vertical_name = st.selectbox("Business vertical", _visible_verticals)
     vertical = REGISTRY[vertical_name]()
 
     st.markdown("---")
