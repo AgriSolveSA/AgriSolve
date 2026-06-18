@@ -1,0 +1,43 @@
+# sme-analytics — CI
+# Runs the existing 184-test pytest suite on every push/PR, since until now
+# it only ever ran when someone happened to run it locally.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pytest (184 tests)
+        run: pytest --cov=verticals --cov-report=term-missing
+
+      - name: Lint with ruff (non-blocking — pre-existing findings not yet triaged)
+        run: ruff check . || true
+
+      - name: Verify the Streamlit app parses cleanly
+        run: python -c "import ast; [ast.parse(open(f, encoding='utf-8').read()) for f in ['streamlit_app.py', 'app.py']]; print('OK')"
