@@ -7,7 +7,7 @@ No business logic lives here — this file is a wiring layer only.
 """
 
 import pandas as pd
-from verticals.base import VerticalBase
+from verticals.base import VerticalBase, month_period_labels
 from verticals.insurance_broker import demo_data, schema, reconcile_logic, kpis
 
 
@@ -70,10 +70,11 @@ class InsuranceBrokerVertical(VerticalBase):
 
     # ── UI labels ─────────────────────────────────────────────────────────────
 
-    def get_recovery_tracker_label(self) -> dict:
+    def get_recovery_tracker_label(self, period_month: int | None = None, period_year: int | None = None) -> dict:
+        prior_label, current_label = month_period_labels(period_month, period_year)
         return {
-            "prior_section":   "Prior Month — February 2026",
-            "current_section": "Current Month — March 2026 (New Exceptions)",
+            "prior_section":   f"Prior Month — {prior_label}",
+            "current_section": f"Current Month — {current_label} (New Exceptions)",
 
             "disputed_label":  "Disputed",
             "disputed_value":  "R 9,250",

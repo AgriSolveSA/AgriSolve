@@ -7,8 +7,6 @@ with seeded exceptions (loss-making routes, high fuel, late deliveries).
 import pandas as pd
 import numpy as np
 
-_RNG = np.random.default_rng(42)
-
 _VEHICLES = ["VEH-001", "VEH-002", "VEH-003", "VEH-004"]
 _VEHICLE_NAMES = {
     "VEH-001": "Toyota Hino 300",
@@ -42,24 +40,32 @@ def _fuel_cost(vehicle: str, km: float) -> float:
 
 def generate_demo() -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     """Return (trip_manifest_df, {'fleet_costs': fleet_cost_df})."""
+    # A fresh, identically-seeded generator every call -- this used to be a
+    # module-level `_RNG = np.random.default_rng(42)`, which only fixes the
+    # *first* call's output. Streamlit reruns the whole script (including
+    # this call) on every widget interaction within a session, so the old
+    # version silently reshuffled every number on screen on every click —
+    # a real credibility problem for a live sales demo (an exception you
+    # just pointed at would be gone after the next click).
+    rng = np.random.default_rng(42)
 
     rows = []
     trip_id = 1
     dates = pd.date_range("2026-03-01", "2026-03-31", freq="D")
 
     for d in dates:
-        n_trips = _RNG.integers(1, 4)
+        n_trips = rng.integers(1, 4)
         for _ in range(n_trips):
-            vid = _RNG.choice(_VEHICLES)
-            route_id = _RNG.choice(list(_ROUTES.keys()))
+            vid = rng.choice(_VEHICLES)
+            route_id = rng.choice(list(_ROUTES.keys()))
             origin, dest, base_km = _ROUTES[route_id]
-            km = base_km * _RNG.uniform(0.97, 1.03)
+            km = base_km * rng.uniform(0.97, 1.03)
             fuel = _fuel_cost(vid, km)
             toll = round(km * _TOLL_PER_KM, 2)
             revenue = round(km * _REVENUE_PER_KM, 2)
-            driver = _RNG.choice(_DRIVERS)
+            driver = rng.choice(_DRIVERS)
             planned_hrs = round(km / 80, 1)
-            actual_hrs  = round(planned_hrs * _RNG.uniform(0.9, 1.4), 1)
+            actual_hrs  = round(planned_hrs * rng.uniform(0.9, 1.4), 1)
             on_time = actual_hrs <= planned_hrs * 1.15
 
             rows.append({
@@ -83,9 +89,9 @@ def generate_demo() -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     manifest_df = pd.DataFrame(rows)
 
     # Seed exceptions: 6 loss-making trips (revenue < costs), 4 very late
-    for idx in _RNG.choice(len(manifest_df), 6, replace=False):
+    for idx in rng.choice(len(manifest_df), 6, replace=False):
         manifest_df.at[idx, "fuel_cost"] = manifest_df.at[idx, "fuel_cost"] * 2.1
-    for idx in _RNG.choice(len(manifest_df), 4, replace=False):
+    for idx in rng.choice(len(manifest_df), 4, replace=False):
         manifest_df.at[idx, "actual_hours"] = manifest_df.at[idx, "planned_hours"] * 1.55
         manifest_df.at[idx, "on_time"] = False
 
@@ -95,9 +101,9 @@ def generate_demo() -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
         fleet_rows.append({
             "vehicle_id":    vid,
             "vehicle_name":  vname,
-            "insurance":     _RNG.integers(3500, 6000),
-            "maintenance":   _RNG.integers(2000, 5000),
-            "depreciation":  _RNG.integers(4000, 8000),
+            "insurance":     rng.integers(3500, 6000),
+            "maintenance":   rng.integers(2000, 5000),
+            "depreciation":  rng.integers(4000, 8000),
             "licence_fees":  850,
         })
 

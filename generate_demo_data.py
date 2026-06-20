@@ -10,8 +10,6 @@ import random
 from datetime import date, timedelta
 from pathlib import Path
 
-random.seed(42)
-
 # ── Output ──────────────────────────────────────────────────────────────────
 DATA_DIR = Path("data/demo")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -214,6 +212,15 @@ def build_statements(register: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
 def generate_demo() -> tuple[pd.DataFrame, dict[str, pd.DataFrame]]:
     """Return (register_df, {insurer: statement_df}) — used by app.py directly."""
+    # Re-seed on every call, not just once at module import. `random.seed(42)`
+    # used to run once when this module was first imported; Streamlit reruns
+    # the whole script (including this call) on every widget interaction
+    # within a session, so the old version silently produced a *different*
+    # random register on every click — a real credibility problem for a live
+    # sales demo (an exception you just pointed at would be gone after the
+    # next click). Verified: two calls in the same process used to return
+    # different data (`r1.equals(r2)` was False); now identical every time.
+    random.seed(42)
     register = build_register()
     statements = build_statements(register)
     return register, statements

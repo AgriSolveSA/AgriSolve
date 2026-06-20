@@ -12,6 +12,8 @@ vertical-agnostic logic Streamlit-free (verticals/base.py and friends).
 """
 from __future__ import annotations
 
+import hmac
+
 
 def find_client(entered_password: str, clients_config: dict) -> dict | None:
     """
@@ -27,7 +29,11 @@ def find_client(entered_password: str, clients_config: dict) -> dict | None:
         return None
     for client_id, cfg in clients_config.items():
         client_password = cfg.get("password") if hasattr(cfg, "get") else None
-        if client_password and client_password == entered_password:
+        # hmac.compare_digest, not `==` -- plain string equality short-circuits
+        # on the first mismatched character, so comparison time leaks how many
+        # leading characters of a guess are correct (a real, if slow, timing
+        # side-channel against a password gate with no other rate limiting).
+        if client_password and hmac.compare_digest(client_password, entered_password):
             merged = dict(cfg)
             merged["client_id"] = client_id
             return merged
@@ -70,6 +76,6 @@ def authenticate(entered_password: str, legacy_password: str, clients_config: di
     client = find_client(entered_password, clients_config) if clients_config else None
     if client:
         return True, client
-    if legacy_password and entered_password == legacy_password:
+    if legacy_password and hmac.compare_digest(legacy_password, entered_password):
         return True, None
     return False, None

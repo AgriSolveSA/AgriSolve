@@ -49,6 +49,18 @@ class TestDemoData:
             missing = required - set(df.columns)
             assert not missing, f"Statement '{insurer}' missing columns: {missing}"
 
+    def test_generate_demo_is_stable_across_repeated_calls_in_the_same_process(self):
+        # Regression: the module-level `random.seed(42)` in generate_demo_data.py
+        # only fixed the *first* call's output in a given process. Streamlit
+        # reruns the whole script (including this call) on every widget
+        # interaction within a session, so the old version silently produced a
+        # different random register on every click -- numbers and exceptions
+        # would visibly shuffle on screen with no actual change, breaking a
+        # live sales demo's credibility.
+        reg_a, _ = generate_demo()
+        reg_b, _ = generate_demo()
+        assert reg_a.equals(reg_b)
+
     def test_register_active_policies_have_positive_expected_commission(self):
         reg, _ = generate_demo()
         active = reg[reg["policy_status"] == "Active"]

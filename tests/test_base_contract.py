@@ -14,7 +14,7 @@ import pytest
 import pandas as pd
 
 from verticals import REGISTRY
-from verticals.base import VerticalBase
+from verticals.base import VerticalBase, month_period_labels, quarter_period_labels
 
 # Required dict keys per ABC contract ─────────────────────────────────────────
 
@@ -164,9 +164,60 @@ class TestVerticalContract:
         rt = v.get_recovery_tracker_label()
         assert isinstance(rt["prior_rows"], list)
 
+    def test_recovery_tracker_dates_actually_reflect_the_selected_period(self, name, cls):
+        # Regression: prior_section/current_section used to be hardcoded fixed
+        # dates in every vertical (e.g. always "February 2026" / "March 2026"),
+        # so switching the period selector in the sidebar never changed what
+        # the Recovery Tracker claimed the reporting period was. Picking two
+        # clearly different periods must produce two clearly different labels.
+        v = cls()
+        rt_a = v.get_recovery_tracker_label(period_month=3, period_year=2025)
+        rt_b = v.get_recovery_tracker_label(period_month=9, period_year=2027)
+        assert rt_a["current_section"] != rt_b["current_section"]
+        assert rt_a["prior_section"] != rt_b["prior_section"]
+        assert "2025" in rt_a["current_section"]
+        assert "2027" in rt_b["current_section"]
+
     def test_get_upload_labels_has_required_keys(self, name, cls):
         v = cls()
         labels = v.get_upload_labels()
         assert isinstance(labels, dict)
         missing = REQUIRED_UPLOAD_KEYS - set(labels.keys())
         assert not missing, f"{name} get_upload_labels missing keys: {missing}"
+
+
+# ── month_period_labels / quarter_period_labels (shared helpers) ──────────────
+
+class TestMonthPeriodLabels:
+    def test_normal_month(self):
+        prior, current = month_period_labels(6, 2026)
+        assert prior == "May 2026"
+        assert current == "June 2026"
+
+    def test_january_rolls_over_to_december_of_prior_year(self):
+        prior, current = month_period_labels(1, 2026)
+        assert prior == "December 2025"
+        assert current == "January 2026"
+
+    def test_defaults_to_real_current_date_when_not_given(self):
+        # Must not crash, and must return two distinct, non-empty labels.
+        prior, current = month_period_labels()
+        assert prior and current
+        assert prior != current
+
+
+class TestQuarterPeriodLabels:
+    def test_normal_quarter(self):
+        prior, current = quarter_period_labels(11, 2025)  # November -> Q4
+        assert prior == "Q3 2025"
+        assert current == "Q4 2025"
+
+    def test_q1_rolls_over_to_q4_of_prior_year(self):
+        prior, current = quarter_period_labels(2, 2026)  # February -> Q1
+        assert prior == "Q4 2025"
+        assert current == "Q1 2026"
+
+    def test_defaults_to_real_current_date_when_not_given(self):
+        prior, current = quarter_period_labels()
+        assert prior and current
+        assert prior != current

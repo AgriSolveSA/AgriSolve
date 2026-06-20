@@ -5,7 +5,7 @@ reconcile_logic, and kpis.  No business logic lives here.
 """
 
 import pandas as pd
-from verticals.base import VerticalBase
+from verticals.base import VerticalBase, quarter_period_labels
 from verticals.accounting import demo_data, schema, reconcile_logic, kpis
 
 
@@ -68,10 +68,11 @@ class AccountingVertical(VerticalBase):
 
     # ── UI labels ─────────────────────────────────────────────────────────────
 
-    def get_recovery_tracker_label(self) -> dict:
+    def get_recovery_tracker_label(self, period_month: int | None = None, period_year: int | None = None) -> dict:
+        prior_label, current_label = quarter_period_labels(period_month, period_year)
         return {
-            "prior_section":   "Prior Quarter — Q3 2025",
-            "current_section": "Current Quarter — Q4 2025 (New Exceptions)",
+            "prior_section":   f"Prior Quarter — {prior_label}",
+            "current_section": f"Current Quarter — {current_label} (New Exceptions)",
 
             "disputed_label":  "Disputed",
             "disputed_value":  "R 18,200",

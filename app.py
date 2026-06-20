@@ -527,7 +527,7 @@ elif page == "Exception Report":
 elif page == "Recovery Tracker":
     st.subheader("Recovery Tracker")
 
-    rt = vertical.get_recovery_tracker_label()
+    rt = vertical.get_recovery_tracker_label(period_month, sel_year)
 
     st.markdown(f"#### {rt['prior_section']}")
     kc1, kc2, kc3 = st.columns(3)

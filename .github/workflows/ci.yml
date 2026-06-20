@@ -1,6 +1,8 @@
 # sme-analytics — CI
-# Runs the existing 184-test pytest suite on every push/PR, since until now
-# it only ever ran when someone happened to run it locally.
+# Runs the pytest suite on every push/PR, since until now it only ever ran
+# when someone happened to run it locally. (Test count grows over time —
+# don't hardcode it in comments here; pytest's own output is the source of
+# truth. Found stale at 184 vs the real 209 during a 2026-06-19 audit.)
 
 name: CI
 
@@ -33,7 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run pytest (184 tests)
+      - name: Run pytest
         run: pytest --cov=verticals --cov-report=term-missing
 
       - name: Lint with ruff (non-blocking — pre-existing findings not yet triaged)

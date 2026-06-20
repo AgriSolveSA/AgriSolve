@@ -17,7 +17,42 @@ Data flow (one-directional, each layer independently testable):
 """
 
 import abc
+import calendar
+import datetime
 import pandas as pd
+
+_MONTH_NAMES = list(calendar.month_name)  # index 0 is '', 1='January', ... 12='December'
+
+
+def month_period_labels(period_month: int | None = None, period_year: int | None = None) -> tuple[str, str]:
+    """
+    Returns (prior_month_label, current_month_label), e.g. ('February 2026', 'March 2026'),
+    for verticals whose Recovery Tracker reports monthly. Handles the January ->
+    December-of-prior-year rollover. Defaults to the real current month/year so
+    call sites (and tests) that don't pass a period still get a sensible label
+    instead of a crash.
+    """
+    today = datetime.date.today()
+    month = period_month or today.month
+    year  = period_year or today.year
+    prior_month = month - 1 or 12
+    prior_year  = year - 1 if month == 1 else year
+    return f"{_MONTH_NAMES[prior_month]} {prior_year}", f"{_MONTH_NAMES[month]} {year}"
+
+
+def quarter_period_labels(period_month: int | None = None, period_year: int | None = None) -> tuple[str, str]:
+    """
+    Returns (prior_quarter_label, current_quarter_label), e.g. ('Q3 2025', 'Q4 2025'),
+    for verticals whose Recovery Tracker reports quarterly. Handles the Q1 ->
+    Q4-of-prior-year rollover.
+    """
+    today = datetime.date.today()
+    month = period_month or today.month
+    year  = period_year or today.year
+    quarter = (month - 1) // 3 + 1
+    prior_quarter = quarter - 1 or 4
+    prior_year    = year - 1 if quarter == 1 else year
+    return f"Q{prior_quarter} {prior_year}", f"Q{quarter} {year}"
 
 
 class VerticalBase(abc.ABC):
@@ -125,12 +160,21 @@ class VerticalBase(abc.ABC):
     # ── UI labels ─────────────────────────────────────────────────────────────
 
     @abc.abstractmethod
-    def get_recovery_tracker_label(self) -> dict:
+    def get_recovery_tracker_label(self, period_month: int | None = None, period_year: int | None = None) -> dict:
         """
         Return all strings and static data for the Recovery Tracker page.
 
+        period_month/period_year (1-12, e.g. 2026) come from app.py's sidebar
+        period selector and must drive prior_section/current_section -- these
+        used to be hardcoded fixed dates in every vertical, so switching the
+        period dropdown never actually changed what the Recovery Tracker
+        claimed the period was. Defaults to the real current date so existing
+        callers that don't pass a period still get a sensible label.
+
         Required keys:
-            prior_section     — e.g. 'Prior Month — February 2026'
+            prior_section     — e.g. 'Prior Month — February 2026' (use
+                                 month_period_labels()/quarter_period_labels()
+                                 from this module, not a hardcoded string)
             current_section   — e.g. 'Current Month — March 2026 (New Exceptions)'
             disputed_label, disputed_value
             recovered_label, recovered_value, recovered_delta

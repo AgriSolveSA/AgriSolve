@@ -48,6 +48,19 @@ def test_manifest_has_required_columns(manifest_df):
     assert not missing, f"Manifest missing columns: {missing}"
 
 
+def test_generate_demo_is_stable_across_repeated_calls_in_the_same_process():
+    # Regression: the module-level `_RNG = np.random.default_rng(42)` only
+    # fixed the *first* call's output. Streamlit reruns the whole script
+    # (including this call) on every widget interaction within a session, so
+    # the old version silently produced a different random manifest on every
+    # click -- numbers and exceptions would visibly shuffle on screen with
+    # no actual change, breaking a live sales demo's credibility.
+    manifest_a, fleet_a = generate_demo()
+    manifest_b, fleet_b = generate_demo()
+    assert manifest_a.equals(manifest_b)
+    assert fleet_a["fleet_costs"].equals(fleet_b["fleet_costs"])
+
+
 def test_manifest_has_rows(manifest_df):
     assert len(manifest_df) > 10
 
