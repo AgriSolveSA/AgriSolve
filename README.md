@@ -3,7 +3,7 @@
 > Multi-vertical data reconciliation and exception reporting for South African SMEs.  
 > Delivered as a Streamlit web app. Demo-ready. 4 verticals live.
 
-**Last updated:** 2026-06-16
+**Last updated:** 2026-06-21
 
 ---
 
@@ -18,7 +18,7 @@
 | `verticals/accounting/` | Accounting Firm vertical |
 | `verticals/construction/` | Construction vertical |
 | `verticals/logistics/` | Logistics vertical |
-| `tests/` | Pytest suite — 6 files, full coverage per vertical |
+| `tests/` | Pytest suite — 6 files (211 tests as of 2026-06-20), full coverage per vertical, runs in CI on every push/PR |
 | `.streamlit/config.toml` | Dark theme, port 8501 |
 | `.streamlit/secrets.toml.example` | SMTP config template — copy to `secrets.toml` to enable email |
 | `generate_demo_data.py` | CLI to generate demo CSV files |
@@ -88,7 +88,7 @@ The `secrets.toml` file is gitignored and never committed.
 pytest tests/ -v
 ```
 
-6 test files, full coverage per vertical (schema validation, demo data, KPI calculation, reconciliation logic).
+6 test files, 211 tests as of 2026-06-20 (see CI for current count), full coverage per vertical (schema validation, demo data, KPI calculation, reconciliation logic, auth).
 
 ---
 
@@ -103,7 +103,7 @@ pytest tests/ -v
 
 ---
 
-## Status (June 16 2026)
+## Status (June 21 2026)
 
 | Area | Status | Notes |
 |------|--------|-------|
@@ -113,15 +113,15 @@ pytest tests/ -v
 | Email digest | ✅ Done | SMTP + Excel attachment |
 | Demo data | ✅ Done | All 4 verticals |
 | CSV upload | ✅ Done | Upload mode in sidebar |
-| Tests | ✅ Good | 6 test files |
+| Tests | ✅ Good | 6 test files, 211 tests, CI runs them on every push/PR |
 | SMTP secrets | ⚠️ Config needed | Create .streamlit/secrets.toml from example |
-| Auth | ✅ Done | Single shared password gate via `st.secrets["dashboard_password"]` in `app.py` — not full multi-tenant access control |
+| Auth | ✅ Done | Per-client auth via `st.secrets["clients"]` (`auth.py`) — each client gets their own password and sees only their assigned vertical(s); legacy single shared `dashboard_password` still works as a fallback for anyone not yet migrated |
 | Streamlit Cloud deploy | ✅ Shim added | `streamlit_app.py` exists pointing to `app.py` — actual Streamlit Cloud deployment/push still to be done by the owner |
 
 ---
 
 ## What's Next
 
-1. Create `.streamlit/secrets.toml` with Gmail App Password and a `dashboard_password`
+1. Create `.streamlit/secrets.toml` with Gmail App Password and at least one `[clients.*]` entry (or a legacy `dashboard_password`)
 2. Push to Streamlit Cloud and confirm the `streamlit_app.py` entry point deploys cleanly
 3. Book Insurance Broker demo call
